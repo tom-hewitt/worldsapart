@@ -11,7 +11,7 @@ import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { Group, Object3D, Quaternion, Vector3 } from "three";
 import { updatePlayer } from "@/game/planet";
-import {pressStart2P} from "@/app/fonts";
+import { pressStart2P } from "@/app/fonts";
 
 function usePressedKeys() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -53,25 +53,29 @@ export function Game({ gameID }: { gameID: string }) {
     : joystickDirection;
 
   return (
-      <div style={{position: "relative", width: "100%", height: "100%"}}>
-        <Canvas>
-          <GameWorld inputDirection={inputDirection}/>
-        </Canvas>
-        <div style={{position: "absolute", bottom: "20px", right: "20px"}}>
-          <Joystick
-              size={100}
-              sticky={false}
-              baseColor="white"
-              stickColor="grey"
-              start={() => setJoystickDirection(new Vector3(0, 0, 0))}
-              move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
-              stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
-          />
-        </div>
-        <div className="absolute text-center top-3 w-full">
-        <h1 className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}>- Worlds Apart -</h1>
-        </div>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <Canvas>
+        <GameWorld inputDirection={inputDirection} />
+      </Canvas>
+      <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
+        <Joystick
+          size={100}
+          sticky={false}
+          baseColor="white"
+          stickColor="grey"
+          start={() => setJoystickDirection(new Vector3(0, 0, 0))}
+          move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
+          stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
+        />
       </div>
+      <div className="absolute text-center top-3 w-full">
+        <h1
+          className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}
+        >
+          - Worlds Apart -
+        </h1>
+      </div>
+    </div>
   );
 }
 
@@ -142,7 +146,7 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={10} position={[0, 0, 0]} />
-      <Player ref={playerRef} />
+      <Player ref={playerRef} direction={inputDirection.toArray()} />
       {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>
   );
