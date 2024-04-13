@@ -1,55 +1,41 @@
-import { PerspectiveCamera, useGLTF, useTexture, useAnimations } from "@react-three/drei";
-import { ThreeElements, useFrame } from "@react-three/fiber";
-import { useEffect, useState } from "react";
+import { PerspectiveCamera, useAnimations, useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
+import { SkinnedMesh, Vector3 } from "three";
 
-function sphericalToCartesian([r, theta, phi]: [number, number, number]): [
-  number,
-  number,
-  number
-] {
-  const x = r * Math.sin(theta) * Math.cos(phi);
-  const y = r * Math.sin(theta) * Math.sin(phi);
-  const z = r * Math.cos(theta);
-  return [x, y, z];
-}
 
-function sphericalToRotation([r, theta, phi]: [number, number, number]): [
-  number,
-  number,
-  number
-] {
-  return [Math.PI / 2 - theta, phi, 0];
+enum AnimationType {
+  IDLE = "idle",
+  RUN = "run",
+  JUMP = "jump",
+  BACKRUN = "backrun",
+  PUNCHING = "punching",
+  PUNCHREACT = "punchreact",
 }
 
 export function Player({
-  sphericalPosition,
+  position,
+  quaternion,
+  animationType
 }: {
-  sphericalPosition: [number, number, number];
+  position: [number, number, number];
+  quaternion: [number, number, number, number];
+  animationType: AnimationType;
 }) {
-  const position = sphericalToCartesian(sphericalPosition);
-
-  const rotation = sphericalToRotation(sphericalPosition);
-
-  const { nodes, animations } = useGLTF("/models/astronaut_test.glb");
-  const { ref, actions, names } = useAnimations(animations);
-  const [index, setIndex] = useState(3)
-
-  console.log(nodes)
+  const group = useRef<SkinnedMesh>();
+  const { nodes, materials, animations } = useGLTF('models/finalgltfforreal.glb')
+  const { actions } = useAnimations(animations, group)
+  const verticalOffset = 5;
 
   useEffect(() => {
-    // Reset and fade in animation after an index has been changed
-    actions[names[index]]?.reset().fadeIn(0.5).play();
-
-    // In the clean-up phase, fade it out
-    return () => {
-      actions[names[index]]?.fadeOut(0.5);
-    };
-  }, [index, actions, names]);
+    actions?.[animationType]?.play();
+  }, [animationType, actions]);
 
   return (
-    <group position={position} rotation={rotation}>
-       <group name="Scene">
-        <group name="Idle" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+
+    <group position={position} quaternion={quaternion}>
+      <group name="Scene" position={[0, 2.8, 0]}>
+        <group name="idle" rotation={[Math.PI / 2, 0, 0]} scale={2}>
           <skinnedMesh
             name="Cube"
             geometry={nodes.Cube.geometry}
@@ -94,22 +80,29 @@ export function Player({
           />
           <primitive object={nodes.mixamorigHips} />
         </group>
-        <group name="jump" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+        <group name="run" rotation={[Math.PI / 2, 0, 0]} scale={2}>
           <primitive object={nodes.mixamorigHips_1} />
         </group>
-        <group name="run" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+        <group name="jump" rotation={[Math.PI / 2, 0, 0]} scale={2}>
           <primitive object={nodes.mixamorigHips_2} />
+        </group>
+        <group name="backrun" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+          <primitive object={nodes.mixamorigHips_3} />
+        </group>
+        <group name="punching" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+          <primitive object={nodes.mixamorigHips_4} />
+        </group>
+        <group name="punchreact" rotation={[Math.PI / 2, 0, 0]} scale={2}>
+          <primitive object={nodes.mixamorigHips_5} />
         </group>
       </group>
 
-      {/* <mesh>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshStandardMaterial color="hotpink" />
-      </mesh>
-      <mesh position={[0, 0, 1]}>
-        <boxGeometry args={[0.8, 0.5, 0.8]} />
-        <meshStandardMaterial color="hotpink" />
-      </mesh> */}
+      <arrowHelper
+        args={[new Vector3(0, 1, 0), new Vector3(0, 0, 0), 5, 0xff0000, 3, 3]}
+      />
+      {/* <PerspectiveCamera position={[0, 1, 10]} makeDefault={true} /> */}
     </group>
   );
 }
+
+useGLTF.preload('models/finalgltfforreal.glb')
