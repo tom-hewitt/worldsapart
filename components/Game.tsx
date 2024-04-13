@@ -82,16 +82,32 @@ export function Game({ gameID }: { gameID: string }) {
 function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   const vector = new Vector3(0, 0, 0);
 
-  if (pressedKeys.has("w")) {
+  if (
+    pressedKeys.has("w") ||
+    pressedKeys.has("W") ||
+    pressedKeys.has("ArrowUp")
+  ) {
     vector.z -= 1;
   }
-  if (pressedKeys.has("a")) {
+  if (
+    pressedKeys.has("a") ||
+    pressedKeys.has("A") ||
+    pressedKeys.has("ArrowLeft")
+  ) {
     vector.x -= 1;
   }
-  if (pressedKeys.has("s")) {
+  if (
+    pressedKeys.has("s") ||
+    pressedKeys.has("S") ||
+    pressedKeys.has("ArrowDown")
+  ) {
     vector.z += 1;
   }
-  if (pressedKeys.has("d")) {
+  if (
+    pressedKeys.has("d") ||
+    pressedKeys.has("D") ||
+    pressedKeys.has("ArrowRight")
+  ) {
     vector.x += 1;
   }
 
