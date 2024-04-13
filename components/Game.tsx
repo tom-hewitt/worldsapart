@@ -9,7 +9,7 @@ import { PerspectiveCamera } from "@react-three/drei";
 import Planet from "./planet/Planet";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
-import { Quaternion, Vector3 } from "three";
+import { Object3D, Quaternion, Vector3 } from "three";
 
 function useKeyDown(handler: (event: KeyboardEvent) => void) {
   useEffect(() => {
@@ -96,6 +96,14 @@ function directionToVector(direction: Direction): [number, number, number] {
   }
 }
 
+function initialQuaternion(): [number, number, number, number] {
+  const dummy = new Object3D();
+
+  dummy.lookAt(0, 1, 0);
+
+  return dummy.quaternion.toArray() as [number, number, number, number];
+}
+
 function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
   const [position, setPosition] = useState<[number, number, number]>([
     0, 0, 20,
@@ -103,12 +111,10 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
 
   const [quaternion, setQuaternion] = useState<
     [number, number, number, number]
-  >([0.707, 0, 0, 0.707]);
+  >(initialQuaternion());
 
   useFrame((_, delta) => {
     const newVector = new Vector3(...position);
-
-    const newQuaternion = new Quaternion(...quaternion);
 
     if (inputDirection) {
       const directionVector = new Vector3(...directionToVector(inputDirection));
@@ -121,6 +127,18 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
         .multiplyScalar(MOVEMENT_SPEED * delta);
 
       newVector.add(positionChange);
+
+      const dummyObject = new Object3D();
+
+      dummyObject.position.copy(newVector);
+
+      console.log(directionVector);
+
+      dummyObject.lookAt(directionVector);
+
+      setQuaternion(
+        dummyObject.quaternion.toArray() as [number, number, number, number]
+      );
     }
 
     const length = newVector.length();
@@ -132,6 +150,8 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
         .multiplyScalar(GRAVITY * delta);
 
       newVector.add(positionChange);
+    } else if (length < 10) {
+      newVector.multiplyScalar(10 / length);
     }
 
     setPosition(newVector.toArray());
