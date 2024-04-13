@@ -113,6 +113,8 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       new Quaternion().fromArray(quaternion)
     );
 
+    console.log({ ...bodyUp });
+
     setQuaternion(
       new Quaternion()
         .setFromUnitVectors(bodyUp, gravityDirection)
@@ -120,8 +122,6 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
     );
 
     const positionVector = new Vector3(...position);
-
-    console.log(inputDirection);
 
     if (inputDirection) {
       const directionVector = new Vector3(...directionToVector(inputDirection));
