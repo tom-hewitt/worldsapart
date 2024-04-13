@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 function Planet({
   radius,
   segments = 64,
-  color = "blue",
+  color = "#304674",
   position,
   rotation,
 }: {

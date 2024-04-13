@@ -41,7 +41,7 @@ type ContextType = Record<
 >;
 
 export function Astronaut({
-  direction = [0, 0, 0] as const,
+  direction = [0, 0, 0],
   ...props
 }: JSX.IntrinsicElements["group"] & { direction?: [number, number, number] }) {
   const group = useRef<THREE.Group | null>(null);

@@ -2,7 +2,6 @@ import { Quaternion, Vector3 } from "three";
 
 const GRAVITY = -9.81;
 const MOVEMENT_SPEED = 10;
-const PLANET_RADIUS = 10;
 
 export function updatePlayer(
   current: {
@@ -10,7 +9,8 @@ export function updatePlayer(
     quaternion: [number, number, number, number];
   },
   delta: number,
-  inputDirection: Vector3
+  inputDirection: Vector3,
+  planetRadius: number
 ): {
   position: [number, number, number];
   quaternion: [number, number, number, number];
@@ -39,14 +39,14 @@ export function updatePlayer(
 
   const length = positionVector.length();
 
-  if (length > PLANET_RADIUS) {
+  if (length > planetRadius) {
     positionVector.add(
       gravityDirection.clone().multiplyScalar(GRAVITY * delta)
     );
   }
 
-  if (length < PLANET_RADIUS) {
-    positionVector.multiplyScalar(PLANET_RADIUS / positionVector.length());
+  if (length < planetRadius) {
+    positionVector.multiplyScalar(planetRadius / positionVector.length());
   }
 
   const position = positionVector.toArray() as [number, number, number];

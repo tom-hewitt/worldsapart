@@ -113,6 +113,9 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
 
   return vector;
 }
+
+const PLANET_RADIUS = 50;
+
 function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
   const playerRef = React.useRef<Group | null>(null);
 
@@ -142,7 +145,8 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
         ],
       },
       delta,
-      inputDirection
+      inputDirection,
+      PLANET_RADIUS
     );
 
     playerRef.current.position.set(...position);
@@ -161,7 +165,7 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
         intensity={Math.PI}
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Planet radius={10} position={[0, 0, 0]} />
+      <Planet radius={PLANET_RADIUS} position={[0, 0, 0]} />
       <Player ref={playerRef} direction={inputDirection.toArray()} />
       {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>
