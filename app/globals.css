@@ -30,3 +30,16 @@ body {
   }
 
 }
+
+.space-animation {
+  @apply fixed h-px w-px bg-white shadow-[36vw_2vh_2px_1px_#fff,25vw_-27vh_2px_3px_#fff,-11vw_1vh_3px_3px_#fff,-33vw_-12vh_0px_1px_#fff,-23vw_2vh_1px_0px_#fff,-33vw_-43vh_1px_1px_#fff,-16vw_-28vh_3px_0px_#fff,13vw_14vh_2px_3px_#fff,29vw_16vh_2px_3px_#fff,17vw_50vh_3px_0px_#fff,45vw_43vh_1px_0px_#fff,9vw_26vh_2px_1px_#fff,-9vw_47vh_2px_1px_#fff,15vw_38vh_2px_1px_#fff,-28vw_12vh_1px_2px_#fff,16vw_5vh_0px_3px_#fff,42vw_21vh_3px_0px_#fff,-15vw_45vh_0px_0px_#fff,0vw_-45vh_0px_2px_#fff,-9vw_-38vh_2px_0px_#fff,14vw_26vh_1px_2px_#fff,-3vw_23vh_1px_0px_#fff,-49vw_22vh_1px_1px_#fff,-38vw_24vh_3px_3px_#fff,-21vw_6vh_3px_1px_#fff,43vw_3vh_1px_0px_#fff,31vw_-40vh_3px_0px_#fff,-23vw_11vh_3px_3px_#fff,25vw_-24vh_1px_2px_#fff,-21vw_-25vh_1px_1px_#fff,14vw_27vh_0px_1px_#fff,-31vw_3vh_0px_1px_#fff,26vw_-39vh_1px_0px_#fff,28vw_0vh_3px_3px_#fff,10vw_9vh_3px_3px_#fff,50vw_19vh_3px_2px_#fff,24vw_-7vh_3px_1px_#fff,29vw_-15vh_2px_0px_#fff,2vw_-32vh_2px_0px_#fff,-15vw_3vh_1px_3px_#fff,-50vw_50vh_1px_0px_#fff,-47vw_18vh_1px_2px_#fff,-27vw_43vh_3px_3px_#fff,22vw_11vh_3px_1px_#fff,24vw_16vh_0px_1px_#fff,26vw_-47vh_3px_2px_#fff,-44vw_3vh_3px_0px_#fff,-47vw_35vh_3px_3px_#fff,-13vw_-17vh_0px_3px_#fff,-30vw_50vh_3px_0px_#fff,-23vw_-15vh_1px_3px_#fff,33vw_12vh_2px_1px_#fff,9vw_-29vh_1px_1px_#fff,0vw_-32vh_0px_0px_#fff,-37vw_-25vh_1px_2px_#fff,29vw_-33vh_3px_0px_#fff,-2vw_-42vh_0px_0px_#fff,44vw_-20vh_2px_2px_#fff,-42vw_48vh_0px_0px_#fff,43vw_-44vh_3px_1px_#fff,-45vw_-37vh_3px_3px_#fff,24vw_27vh_0px_0px_#fff,39vw_3vh_1px_3px_#fff,-20vw_9vh_0px_3px_#fff,25vw_34vh_1px_3px_#fff,48vw_15vh_3px_2px_#fff,-37vw_41vh_0px_1px_#fff,-28vw_46vh_2px_0px_#fff,47vw_39vh_1px_2px_#fff,-43vw_41vh_2px_1px_#fff,-9vw_23vh_1px_0px_#fff,23vw_-30vh_2px_0px_#fff,-18vw_2vh_0px_0px_#fff,-2vw_39vh_1px_3px_#fff,-28vw_16vh_3px_2px_#fff,46vw_39vh_0px_2px_#fff,21vw_-32vh_2px_3px_#fff,46vw_-11vh_1px_3px_#fff,32vw_9vh_0px_2px_#fff,-39vw_-19vh_2px_2px_#fff,-25vw_-7vh_1px_0px_#fff,-22vw_-32vh_2px_0px_#fff,-29vw_47vh_3px_3px_#fff,8vw_-11vh_1px_1px_#fff,49vw_-49vh_2px_1px_#fff,3vw_-14vh_1px_2px_#fff,34vw_-45vh_2px_1px_#fff,36vw_-28vh_0px_2px_#fff,-14vw_-1vh_3px_0px_#fff,16vw_35vh_1px_2px_#fff,26vw_-46vh_0px_2px_#fff,-4vw_16vh_0px_1px_#fff,14vw_-6vh_1px_3px_#fff,-12vw_-25vh_2px_2px_#fff,-26vw_-31vh_1px_0px_#fff,20vw_5vh_1px_0px_#fff,-46vw_12vh_1px_0px_#fff,-45vw_-10vh_3px_3px_#fff,19vw_3vh_1px_3px_#fff,-48vw_44vh_1px_2px_#fff] animate-[zoom_10s_alternate_infinite] rounded-[50%] left-2/4 top-2/4;
+}
+
+@keyframes zoom {
+  0%{
+    transform: scale(1);
+  }
+  100%{
+    transform: scale(1.5);
+  }
+}
