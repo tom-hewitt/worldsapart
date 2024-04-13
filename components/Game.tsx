@@ -141,7 +141,7 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={10} position={[0, 0, 0]} />
       <Player ref={playerRef} />
-      <PerspectiveCamera position={[0, 0, 60]} makeDefault />
+      {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>
   );
 }
