@@ -7,6 +7,8 @@ import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
 import { PerspectiveCamera } from "@react-three/drei";
 import Planet from "./planet/Planet";
+import {Joystick} from "react-joystick-component";
+import {IJoystickUpdateEvent} from "react-joystick-component/build/lib/Joystick";
 
 function useKeyDown(handler: (event: KeyboardEvent) => void) {
   React.useEffect(() => {
@@ -58,6 +60,32 @@ function moveForward(
 }
 
 export function Game({ gameID }: { gameID: string }) {
+  const [currentDirection, setCurrentDirection] = useState<string | null>(null); // Used for joystick
+
+  const handleMove = (event: IJoystickUpdateEvent) => {
+    if (event.direction != currentDirection) {
+      setCurrentDirection(event.direction);
+      console.log("MOVE: ", event.direction);
+      // CALL useKeyDown here, instead of code below
+      switch (event.direction) {
+        case "FORWARD":
+          setPosition((position) => moveForward(position, yaw, 0.1));
+          break;
+        case "LEFT":
+          setPosition(([r, theta, phi]) => [r, theta - 0.1, phi]);
+          break;
+        case "BACKWARD":
+          setPosition(([r, theta, phi]) => [r, theta, phi - 0.1]);
+          break;
+        case "RIGHT":
+          setPosition(([r, theta, phi]) => [r, theta + 0.1, phi]);
+          break;
+      }
+
+
+    }
+  };
+
   const socket = usePartySocket({
     host: PARTYKIT_HOST,
     room: gameID,
@@ -98,19 +126,31 @@ export function Game({ gameID }: { gameID: string }) {
   });
 
   return (
-    <Canvas>
-      <ambientLight intensity={Math.PI / 2} />
-      <spotLight
-        position={[10, 10, 10]}
-        angle={0.15}
-        penumbra={1}
-        decay={0}
-        intensity={Math.PI}
-      />
-      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Planet radius={10} position={[0, 0, 0]} />
-      <Player sphericalPosition={position} />
-      <PerspectiveCamera position={[0, 0, 50]} makeDefault={true} />
-    </Canvas>
-  );
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <Canvas>
+        <ambientLight intensity={Math.PI / 2} />
+        <spotLight
+            position={[10, 10, 10]}
+            angle={0.15}
+            penumbra={1}
+            decay={0}
+            intensity={Math.PI}
+        />
+        <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+        <Planet radius={10} position={[0, 0, 0]} />
+        <Player sphericalPosition={position} />
+        <PerspectiveCamera position={[0, 0, 50]} makeDefault={true} />
+      </Canvas>
+      <div style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
+        <Joystick
+            size={100}
+            sticky={false}
+            baseColor="black"
+            stickColor="grey"
+            start={() => setCurrentDirection(null)}
+            move={handleMove}
+        />
+      </div>
+    </div>
+);
 }
