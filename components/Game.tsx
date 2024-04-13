@@ -1,156 +1,156 @@
 "use client";
 
-import React, { useState } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import React, { useEffect, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { usePartySocket } from "partysocket/react";
 import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
 import { PerspectiveCamera } from "@react-three/drei";
 import Planet from "./planet/Planet";
-import {Joystick} from "react-joystick-component";
-import {IJoystickUpdateEvent} from "react-joystick-component/build/lib/Joystick";
+import { Joystick } from "react-joystick-component";
+import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
+import { Quaternion, Vector3 } from "three";
 
 function useKeyDown(handler: (event: KeyboardEvent) => void) {
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [handler]);
 }
 
-function moveForward(
-  [r, theta, phi]: [number, number, number],
-  yaw: number,
-  distance: number
-): [number, number, number] {
-  // Calculate the angular displacement given the distance to move
-  const angularDistance = distance / r; // Convert linear distance to angular distance in radians
-
-  // Adjust phi and theta to move in the "forward" direction based on yaw
-  const deltaPhi = angularDistance * Math.sin(yaw); // Change in phi
-  const deltaTheta = angularDistance * Math.cos(yaw); // Change in theta
-
-  // Update phi and theta
-  let newPhi = phi + deltaPhi;
-  let newTheta = theta - deltaTheta; // Subtract because increasing theta moves down from the north pole
-
-  // Normalize phi to be within 0 and 2*PI
-  if (newPhi < 0) {
-    newPhi += 2 * Math.PI;
-  } else if (newPhi >= 2 * Math.PI) {
-    newPhi -= 2 * Math.PI;
-  }
-
-  // Normalize theta to be within 0 and PI
-  if (newTheta < 0) {
-    newTheta = -newTheta;
-    newPhi += Math.PI; // Crossed over the pole
-  } else if (newTheta > Math.PI) {
-    newTheta = 2 * Math.PI - newTheta;
-    newPhi += Math.PI; // Crossed over the pole
-  }
-
-  // Ensure phi is normalized again after potentially crossing the pole
-  if (newPhi >= 2 * Math.PI) {
-    newPhi -= 2 * Math.PI;
-  } else if (newPhi < 0) {
-    newPhi += 2 * Math.PI;
-  }
-
-  return [r, newTheta, newPhi];
+function useKeyUp(handler: (event: KeyboardEvent) => void) {
+  useEffect(() => {
+    window.addEventListener("keyup", handler);
+    return () => window.removeEventListener("keyup", handler);
+  }, [handler]);
 }
 
 export function Game({ gameID }: { gameID: string }) {
   const [currentDirection, setCurrentDirection] = useState<string | null>(null); // Used for joystick
 
-  const handleMove = (event: IJoystickUpdateEvent) => {
-    if (event.direction != currentDirection) {
-      setCurrentDirection(event.direction);
-      console.log("MOVE: ", event.direction);
-      // CALL useKeyDown here, instead of code below
-      switch (event.direction) {
-        case "FORWARD":
-          setPosition((position) => moveForward(position, yaw, 0.1));
-          break;
-        case "LEFT":
-          setPosition(([r, theta, phi]) => [r, theta - 0.1, phi]);
-          break;
-        case "BACKWARD":
-          setPosition(([r, theta, phi]) => [r, theta, phi - 0.1]);
-          break;
-        case "RIGHT":
-          setPosition(([r, theta, phi]) => [r, theta + 0.1, phi]);
-          break;
-      }
-
-
-    }
-  };
-
-  const socket = usePartySocket({
-    host: PARTYKIT_HOST,
-    room: gameID,
-    onMessage(event) {
-      console.log("Received message:", event.data);
-    },
-  });
-
-  const [position, setPosition] = useState<[number, number, number]>([
-    10, 0, 0,
-  ]);
-
-  const [yaw, setYaw] = useState(0);
+  const [inputDirection, setInputDirection] = useState<Direction | null>(null);
 
   useKeyDown((event) => {
-    switch (event.key.toLowerCase()) {
+    switch (event.key) {
       case "w":
-      case "arrowup":
-        setPosition((position) => moveForward(position, yaw, 0.1));
-        socket.send("move up");
+        setInputDirection("FORWARD");
         break;
       case "a":
-      case "arrowleft":
-        setPosition(([r, theta, phi]) => [r, theta - 0.1, phi]);
-        socket.send("move left");
+        setInputDirection("LEFT");
         break;
       case "s":
-      case "arrowdown":
-        setPosition(([r, theta, phi]) => [r, theta, phi - 0.1]);
-        socket.send("move down");
+        setInputDirection("BACKWARD");
         break;
       case "d":
-      case "arrowright":
-        setPosition(([r, theta, phi]) => [r, theta + 0.1, phi]);
-        socket.send("move right");
+        setInputDirection("RIGHT");
+        break;
+    }
+  });
+
+  useKeyUp((event) => {
+    switch (event.key) {
+      case "w":
+      case "a":
+      case "s":
+      case "d":
+        setInputDirection(null);
         break;
     }
   });
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas>
-        <ambientLight intensity={Math.PI / 2} />
-        <spotLight
-            position={[10, 10, 10]}
-            angle={0.15}
-            penumbra={1}
-            decay={0}
-            intensity={Math.PI}
-        />
-        <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-        <Planet radius={10} position={[0, 0, 0]} />
-        <Player sphericalPosition={position} />
-        <PerspectiveCamera position={[0, 0, 50]} makeDefault={true} />
+        <GameWorld inputDirection={inputDirection} />
       </Canvas>
-      <div style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
+      <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
         <Joystick
-            size={100}
-            sticky={false}
-            baseColor="black"
-            stickColor="grey"
-            start={() => setCurrentDirection(null)}
-            move={handleMove}
+          size={100}
+          sticky={false}
+          baseColor="black"
+          stickColor="grey"
+          start={() => setCurrentDirection(null)}
+          move={(e) => setInputDirection(e.direction)}
         />
       </div>
     </div>
-);
+  );
+}
+
+const GRAVITY = -9.81;
+
+const MOVEMENT_SPEED = 10;
+
+type Direction = "FORWARD" | "LEFT" | "BACKWARD" | "RIGHT";
+
+function directionToVector(direction: Direction): [number, number, number] {
+  switch (direction) {
+    case "FORWARD":
+      return [0, 0, -1];
+    case "LEFT":
+      return [-1, 0, 0];
+    case "BACKWARD":
+      return [0, 0, 1];
+    case "RIGHT":
+      return [1, 0, 0];
+  }
+}
+
+function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
+  const [position, setPosition] = useState<[number, number, number]>([
+    0, 0, 20,
+  ]);
+
+  const [quaternion, setQuaternion] = useState<
+    [number, number, number, number]
+  >([0.707, 0, 0, 0.707]);
+
+  useFrame((_, delta) => {
+    const newVector = new Vector3(...position);
+
+    const newQuaternion = new Quaternion(...quaternion);
+
+    if (inputDirection) {
+      const directionVector = new Vector3(...directionToVector(inputDirection));
+
+      directionVector.applyQuaternion(new Quaternion(...quaternion));
+
+      const positionChange = directionVector
+        .clone()
+        .normalize()
+        .multiplyScalar(MOVEMENT_SPEED * delta);
+
+      newVector.add(positionChange);
+    }
+
+    const length = newVector.length();
+
+    if (length > 10) {
+      const positionChange = newVector
+        .clone()
+        .normalize()
+        .multiplyScalar(GRAVITY * delta);
+
+      newVector.add(positionChange);
+    }
+
+    setPosition(newVector.toArray());
+  });
+
+  return (
+    <>
+      <ambientLight intensity={Math.PI / 2} />
+      <spotLight
+        position={[10, 10, 10]}
+        angle={0.15}
+        penumbra={1}
+        decay={0}
+        intensity={Math.PI}
+      />
+      <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+      <Planet radius={10} position={[0, 0, 0]} />
+      <Player position={position} />
+      <PerspectiveCamera position={[0, 0, 50]} makeDefault={true} />
+    </>
+  );
 }

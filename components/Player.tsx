@@ -20,17 +20,9 @@ function sphericalToRotation([r, theta, phi]: [number, number, number]): [
   return [Math.PI / 2 - theta, phi, 0];
 }
 
-export function Player({
-  sphericalPosition,
-}: {
-  sphericalPosition: [number, number, number];
-}) {
-  const position = sphericalToCartesian(sphericalPosition);
-
-  const rotation = sphericalToRotation(sphericalPosition);
-
+export function Player({ position }: { position: [number, number, number] }) {
   return (
-    <group position={position} rotation={rotation}>
+    <group position={position}>
       <mesh>
         <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial color="hotpink" />
