@@ -1,15 +1,10 @@
 import { PerspectiveCamera } from "@react-three/drei";
-import { Vector3 } from "three";
+import { forwardRef } from "react";
+import { Group, Object3D, Vector3 } from "three";
 
-export function Player({
-  position,
-  quaternion,
-}: {
-  position: [number, number, number];
-  quaternion: [number, number, number, number];
-}) {
+export const Player = forwardRef<Group | null>(function Player(props, ref) {
   return (
-    <group position={position} quaternion={quaternion}>
+    <group ref={ref}>
       <mesh>
         <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial color="hotpink" />
@@ -22,7 +17,7 @@ export function Player({
       <arrowHelper
         args={[new Vector3(0, 1, 0), new Vector3(0, 0, 0), 5, 0xff0000, 3, 3]}
       />
-      <PerspectiveCamera position={[0, 1, 10]} makeDefault={true} />
+      {/* <PerspectiveCamera position={[0, 1, 10]} makeDefault={true} /> */}
     </group>
   );
-}
+});
