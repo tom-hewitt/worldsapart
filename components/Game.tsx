@@ -113,11 +113,10 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       new Quaternion().fromArray(quaternion)
     );
 
-    console.log({ ...bodyUp });
-
     setQuaternion(
       new Quaternion()
         .setFromUnitVectors(bodyUp, gravityDirection)
+        .multiply(new Quaternion().fromArray(quaternion))
         .toArray() as [number, number, number, number]
     );
 
