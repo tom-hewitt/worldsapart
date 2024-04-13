@@ -103,8 +103,6 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
   useFrame((_, delta) => {
     if (!playerRef.current) return;
 
-    console.log(inputDirection);
-
     const { position, quaternion } = updatePlayer(
       {
         position: playerRef.current.position.toArray() as [
