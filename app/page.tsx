@@ -16,6 +16,7 @@ export default function Home() {
 
     return (
         <div className="flex flex-col gap-2 items-center justify-center h-screen w-screen">
+            <h1 className="text-7xl font-conthrax text-black mb-20">- Worlds Apart - </h1>
             <Link href={`/${id}`} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
                 New Game
             </Link>
