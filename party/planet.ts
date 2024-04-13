@@ -6,9 +6,9 @@ export default class Server implements Party.Server {
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     // A websocket just connected!
     console.log(
-      `Connected:
+      `Connected To Planet:
   id: ${conn.id}
-  room: ${this.room.id}
+  planet: ${this.room.id}
   url: ${new URL(ctx.request.url).pathname}`
     );
 
