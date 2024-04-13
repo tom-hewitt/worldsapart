@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {redirect} from "next/navigation";
+import {pressStart2P} from "./fonts";
 
 const randomId = () => Math.random().toString(36).substring(2, 10);
 
@@ -16,7 +17,7 @@ export default function Home() {
 
     return (
         <div className="flex flex-col gap-2 items-center justify-center h-screen w-screen">
-            <h1 className="text-7xl font-conthrax text-black dark:text-white mb-20">- Worlds Apart -</h1>
+            <h1 className={`${pressStart2P.className} text-5xl text-black dark:text-white mb-20`}>- Worlds Apart -</h1>
             <Link href={`/${id}`} className="px-10 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
                 New Game
             </Link>
