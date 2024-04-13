@@ -1,6 +1,5 @@
-import { PerspectiveCamera } from "@react-three/drei";
 import { forwardRef } from "react";
-import { Group, Object3D, Vector3 } from "three";
+import { Group} from "three";
 
 export const pyramidShipPart = forwardRef<Group | null > (function Player(props, ref) {
   return (
