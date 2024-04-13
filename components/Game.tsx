@@ -11,57 +11,41 @@ import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { Object3D, Quaternion, Vector3 } from "three";
 
-function useKeyDown(handler: (event: KeyboardEvent) => void) {
-  useEffect(() => {
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [handler]);
-}
+function usePressedKeys() {
+  const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
 
-function useKeyUp(handler: (event: KeyboardEvent) => void) {
   useEffect(() => {
-    window.addEventListener("keyup", handler);
-    return () => window.removeEventListener("keyup", handler);
-  }, [handler]);
+    const onKeyDown = (event: KeyboardEvent) => {
+      setPressedKeys((prev) => new Set(prev).add(event.key));
+    };
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      setPressedKeys((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(event.key);
+        return newSet;
+      });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+    };
+  }, []);
+
+  return pressedKeys;
 }
 
 export function Game({ gameID }: { gameID: string }) {
   const [currentDirection, setCurrentDirection] = useState<string | null>(null); // Used for joystick
 
-  const [inputDirection, setInputDirection] = useState<Direction | null>(null);
-
-  useKeyDown((event) => {
-    switch (event.key) {
-      case "w":
-        setInputDirection("FORWARD");
-        break;
-      case "a":
-        setInputDirection("LEFT");
-        break;
-      case "s":
-        setInputDirection("BACKWARD");
-        break;
-      case "d":
-        setInputDirection("RIGHT");
-        break;
-    }
-  });
-
-  useKeyUp((event) => {
-    switch (event.key) {
-      case "w":
-      case "a":
-      case "s":
-      case "d":
-        setInputDirection(null);
-        break;
-    }
-  });
-
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas>
-        <GameWorld inputDirection={inputDirection} />
+        <GameWorld />
       </Canvas>
       <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
         <Joystick
@@ -70,7 +54,7 @@ export function Game({ gameID }: { gameID: string }) {
           baseColor="white"
           stickColor="grey"
           start={() => setCurrentDirection(null)}
-          move={(e) => setInputDirection(e.direction)}
+          move={(e) => console.log(e.direction)}
         />
       </div>
     </div>
@@ -83,19 +67,25 @@ const MOVEMENT_SPEED = 10;
 
 type Direction = "FORWARD" | "LEFT" | "BACKWARD" | "RIGHT";
 
-function directionToVector(direction: Direction): [number, number, number] {
-  switch (direction) {
-    case "FORWARD":
-      return [0, 0, -1];
-    case "LEFT":
-      return [-1, 0, 0];
-    case "BACKWARD":
-      return [0, 0, 1];
-    case "RIGHT":
-      return [1, 0, 0];
+function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
+  const vector = new Vector3(0, 0, 0);
+
+  if (pressedKeys.has("w")) {
+    vector.z -= 1;
   }
+  if (pressedKeys.has("a")) {
+    vector.x -= 1;
+  }
+  if (pressedKeys.has("s")) {
+    vector.z += 1;
+  }
+  if (pressedKeys.has("d")) {
+    vector.x += 1;
+  }
+
+  return vector;
 }
-function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
+function GameWorld() {
   const [position, setPosition] = useState<[number, number, number]>([
     0, 20, 0,
   ]);
@@ -103,6 +93,8 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
   const [quaternion, setQuaternion] = useState<
     [number, number, number, number]
   >([0, 0, 0, 1]);
+
+  const pressedKeys = usePressedKeys();
 
   useFrame((_, delta) => {
     // direction gravity is being applied
@@ -122,15 +114,13 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
 
     const positionVector = new Vector3(...position);
 
-    if (inputDirection) {
-      const directionVector = new Vector3(...directionToVector(inputDirection));
+    const directionVector = pressedKeysToVector(pressedKeys);
 
-      const movementVector = directionVector
-        .applyQuaternion(new Quaternion().fromArray(quaternion))
-        .multiplyScalar(MOVEMENT_SPEED * delta);
+    const movementVector = directionVector
+      .applyQuaternion(new Quaternion().fromArray(quaternion))
+      .multiplyScalar(MOVEMENT_SPEED * delta);
 
-      positionVector.add(movementVector);
-    }
+    positionVector.add(movementVector);
 
     if (positionVector.length() > 10) {
       positionVector.add(gravityDirection.multiplyScalar(GRAVITY * delta));
@@ -154,7 +144,7 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={10} position={[0, 0, 0]} />
       <Player position={position} quaternion={quaternion} />
-      <PerspectiveCamera position={[0, 0, 60]} makeDefault />
+      {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>
   );
 }
