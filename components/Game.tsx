@@ -40,12 +40,16 @@ function usePressedKeys() {
 }
 
 export function Game({ gameID }: { gameID: string }) {
-  const [currentDirection, setCurrentDirection] = useState<string | null>(null); // Used for joystick
+  const [currentDirection, setCurrentDirection] = useState<Vector3 | null>(null);
+
+  const handleMove = (e: IJoystickUpdateEvent) => {
+    setCurrentDirection(new Vector3(e.x!, 0, -e.y!));
+  };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas>
-        <GameWorld />
+        <GameWorld currentDirection={currentDirection} />
       </Canvas>
       <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
         <Joystick
@@ -54,7 +58,8 @@ export function Game({ gameID }: { gameID: string }) {
           baseColor="white"
           stickColor="grey"
           start={() => setCurrentDirection(null)}
-          move={(e) => console.log(e.direction)}
+          move={handleMove}
+          stop={() => setCurrentDirection(null)}
         />
       </div>
     </div>
@@ -85,7 +90,7 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
 
   return vector;
 }
-function GameWorld() {
+function GameWorld({ currentDirection }: { currentDirection: Vector3 | null }) {
   const [position, setPosition] = useState<[number, number, number]>([
     0, 20, 0,
   ]);
@@ -115,6 +120,10 @@ function GameWorld() {
     const positionVector = new Vector3(...position);
 
     const directionVector = pressedKeysToVector(pressedKeys);
+
+    if (currentDirection) {
+      directionVector.add(currentDirection);
+    }
 
     const movementVector = directionVector
       .applyQuaternion(new Quaternion().fromArray(quaternion))
