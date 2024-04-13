@@ -95,66 +95,49 @@ function directionToVector(direction: Direction): [number, number, number] {
       return [1, 0, 0];
   }
 }
-
-function initialQuaternion(): [number, number, number, number] {
-  const dummy = new Object3D();
-
-  dummy.lookAt(0, 1, 0);
-
-  return dummy.quaternion.toArray() as [number, number, number, number];
-}
-
 function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
   const [position, setPosition] = useState<[number, number, number]>([
-    0, 0, 20,
+    0, 20, 0,
   ]);
 
   const [quaternion, setQuaternion] = useState<
     [number, number, number, number]
-  >(initialQuaternion());
+  >([0, 0, 0, 1]);
 
   useFrame((_, delta) => {
-    const newVector = new Vector3(...position);
+    // direction gravity is being applied
+    const gravityDirection = new Vector3(...position).normalize();
 
-    if (inputDirection) {
-      const directionVector = new Vector3(...directionToVector(inputDirection));
+    // current up direction of the body
+    const bodyUp = new Vector3(0, 1, 0).applyQuaternion(
+      new Quaternion().fromArray(quaternion)
+    );
 
-      directionVector.applyQuaternion(new Quaternion(...quaternion));
+    console.log({ ...bodyUp });
 
-      const positionChange = directionVector
-        .clone()
-        .normalize()
-        .multiplyScalar(MOVEMENT_SPEED * delta);
+    setQuaternion(
+      (quaternion) =>
+        new Quaternion()
+          .setFromUnitVectors(gravityDirection, bodyUp)
+          .multiply(new Quaternion().fromArray(quaternion))
+          .toArray() as [number, number, number, number]
+    );
 
-      newVector.add(positionChange);
+    const positionVector = new Vector3(...position);
 
-      const dummyObject = new Object3D();
-
-      dummyObject.position.copy(newVector);
-
-      console.log(directionVector);
-
-      dummyObject.lookAt(directionVector);
-
-      setQuaternion(
-        dummyObject.quaternion.toArray() as [number, number, number, number]
+    if (positionVector.length() > 10) {
+      setPosition(
+        positionVector
+          .add(gravityDirection.multiplyScalar(GRAVITY * delta))
+          .toArray() as [number, number, number]
+      );
+    } else if (positionVector.length() < 10) {
+      setPosition(
+        positionVector
+          .multiplyScalar(10 / positionVector.length())
+          .toArray() as [number, number, number]
       );
     }
-
-    const length = newVector.length();
-
-    if (length > 10) {
-      const positionChange = newVector
-        .clone()
-        .normalize()
-        .multiplyScalar(GRAVITY * delta);
-
-      newVector.add(positionChange);
-    } else if (length < 10) {
-      newVector.multiplyScalar(10 / length);
-    }
-
-    setPosition(newVector.toArray());
   });
 
   return (
@@ -169,8 +152,7 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={10} position={[0, 0, 0]} />
-      <Player position={position} />
-      <PerspectiveCamera position={[0, 0, 50]} makeDefault={true} />
+      <Player position={position} quaternion={quaternion} />
     </>
   );
 }
