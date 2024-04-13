@@ -1,6 +1,9 @@
 {
   "$schema": "https://www.partykit.io/schema.json",
   "name": "worldsapart-party",
+  "compatibilityDate": "2024-04-13",
   "main": "party/index.ts",
-  "compatibilityDate": "2024-04-13"
+  "parties": {
+    "planet": "party/planet.ts"
+  }
 }
