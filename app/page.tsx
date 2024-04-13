@@ -1,45 +1,29 @@
-import Button from "@/components/Button";
-import PollMaker from "@/components/PollMaker";
-import Balloon from "@/components/Balloon";
-import { Poll } from "@/app/types";
-import { redirect } from "next/navigation";
-import { PARTYKIT_URL } from "./env";
-import Input from "@/components/Input";
+import Link from "next/link";
+import {redirect} from "next/navigation";
 
 const randomId = () => Math.random().toString(36).substring(2, 10);
 
 export default function Home() {
-  async function createPoll(formData: FormData) {
-    "use server";
+    const id = randomId();
 
-    const title = formData.get("title")?.toString() ?? "Anonymous poll";
-    const options: string[] = [];
+    async function joinGame(formData: FormData) {
+        "use server";
 
-    for (const [key, value] of formData.entries()) {
-      if (key.startsWith("option-") && value.toString().trim().length > 0) {
-        options.push(value.toString());
-      }
+        const gameID = formData.get("gameId");
+
+        redirect(`${gameID}`);
     }
 
-    const id = randomId();
-    const poll: Poll = {
-      title,
-      options,
-    };
-
-    // 🎈 TODO: send a POST request to a PartyKit room
-
-    redirect(`/${id}`);
-  }
-
-  return (
-    <>
-      <form action={createPoll}>
-        <div className="flex flex-col space-y-6">
-          <PollMaker />
+    return (
+        <div className="flex flex-col gap-2 items-center justify-center h-screen w-screen">
+            <Link href={`/${id}`} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
+                New Game
+            </Link>
+            <h5>OR</h5>
+            <form action={joinGame}>
+                <input type="text" name="gameId" placeholder="Enter Game ID" required className="input-standard" />
+                <button type="submit" className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">Join Game</button>
+            </form>
         </div>
-      </form>
-      <Balloon />
-    </>
-  );
+    );
 }
