@@ -67,7 +67,7 @@ export function Game({ gameID }: { gameID: string }) {
         <Joystick
           size={100}
           sticky={false}
-          baseColor="black"
+          baseColor="white"
           stickColor="grey"
           start={() => setCurrentDirection(null)}
           move={(e) => setInputDirection(e.direction)}

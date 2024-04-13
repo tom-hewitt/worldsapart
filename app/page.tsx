@@ -16,14 +16,15 @@ export default function Home() {
 
     return (
         <div className="flex flex-col gap-2 items-center justify-center h-screen w-screen">
-            <h1 className="text-7xl font-conthrax text-black mb-20">- Worlds Apart - </h1>
-            <Link href={`/${id}`} className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
+            <h1 className="text-7xl font-conthrax text-black dark:text-white mb-20">- Worlds Apart -</h1>
+            <Link href={`/${id}`} className="px-10 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">
                 New Game
             </Link>
-            <h5>OR</h5>
-            <form action={joinGame}>
-                <input type="text" name="gameId" placeholder="Enter Game ID" required className="input-standard" />
-                <button type="submit" className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors">Join Game</button>
+            <h5 className="py-5">OR</h5>
+            <form action={joinGame} className="items-center justify-center text-center">
+                <input type="text" name="gameId" placeholder="Enter Game ID" required className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                <br></br>
+                <button type="submit" className="px-10 py-2 text-white bg-red-500 rounded hover:bg-blue-600 transition-colors">Join Game</button>
             </form>
         </div>
     );
