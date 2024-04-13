@@ -17,7 +17,7 @@ export function Player({
         <boxGeometry args={[0.8, 0.5, 0.8]} />
         <meshStandardMaterial color="red" />
       </mesh>
-      <PerspectiveCamera position={[0, 1, 10]} makeDefault={true} />
+      {/* <PerspectiveCamera position={[0, 1, 10]} makeDefault={true} /> */}
     </group>
   );
 }

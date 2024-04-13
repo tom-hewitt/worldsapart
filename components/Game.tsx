@@ -113,31 +113,33 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       new Quaternion().fromArray(quaternion)
     );
 
-    console.log({ ...bodyUp });
-
     setQuaternion(
-      (quaternion) =>
-        new Quaternion()
-          .setFromUnitVectors(gravityDirection, bodyUp)
-          .multiply(new Quaternion().fromArray(quaternion))
-          .toArray() as [number, number, number, number]
+      new Quaternion()
+        .setFromUnitVectors(bodyUp, gravityDirection)
+        .toArray() as [number, number, number, number]
     );
 
     const positionVector = new Vector3(...position);
 
-    if (positionVector.length() > 10) {
-      setPosition(
-        positionVector
-          .add(gravityDirection.multiplyScalar(GRAVITY * delta))
-          .toArray() as [number, number, number]
-      );
-    } else if (positionVector.length() < 10) {
-      setPosition(
-        positionVector
-          .multiplyScalar(10 / positionVector.length())
-          .toArray() as [number, number, number]
-      );
+    console.log(inputDirection);
+
+    if (inputDirection) {
+      const directionVector = new Vector3(...directionToVector(inputDirection));
+
+      const movementVector = directionVector
+        .applyQuaternion(new Quaternion().fromArray(quaternion))
+        .multiplyScalar(MOVEMENT_SPEED * delta);
+
+      positionVector.add(movementVector);
     }
+
+    if (positionVector.length() > 10) {
+      positionVector.add(gravityDirection.multiplyScalar(GRAVITY * delta));
+    } else if (positionVector.length() < 10) {
+      positionVector.multiplyScalar(10 / positionVector.length()).toArray();
+    }
+
+    setPosition(positionVector.toArray() as [number, number, number]);
   });
 
   return (
@@ -153,6 +155,7 @@ function GameWorld({ inputDirection }: { inputDirection: Direction | null }) {
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={10} position={[0, 0, 0]} />
       <Player position={position} quaternion={quaternion} />
+      <PerspectiveCamera position={[0, 0, 60]} makeDefault />
     </>
   );
 }
