@@ -1,8 +1,32 @@
 import { updatePlayer, randomPlanetSurfacePlacement } from "@/game/planet";
 import type * as Party from "partykit/server";
 
+const NAMES = [
+  "Stardust",
+  "Moonbeam",
+  "Nebula",
+  "Nova",
+  "Eclipse",
+  "Zephyr",
+  "Serenade",
+  "Comet",
+  "Fusion",
+  "Rhapsody",
+  "Galaxy",
+  "Orbit",
+  "Celestia",
+  "Astro",
+  "Cosmo",
+  "Gravity",
+  "Solstice",
+  "Voyager",
+  "Radiance",
+  "Infinity",
+];
+
 export type PlayerData = {
   id: string;
+  name: string;
   inputDirection: [number, number, number];
   position: [number, number, number];
   quaternion: [number, number, number, number];
@@ -49,6 +73,7 @@ export default class PlanetServer implements Party.Server {
 
     this.players[conn.id] = {
       id: conn.id,
+      name: NAMES[Math.floor(Math.random() * NAMES.length)],
       inputDirection: [0, 0, 0],
       ...randomPlanetSurfacePlacement(),
       inventory: [],

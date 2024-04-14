@@ -272,6 +272,7 @@ function GameWorld({
           quaternion={player.quaternion}
           direction={player.inputDirection}
           isLocalPlayer={id === localPlayerID}
+          name={player.name}
         />
       ))}
 
