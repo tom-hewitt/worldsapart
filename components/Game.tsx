@@ -5,11 +5,12 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { usePartySocket } from "partysocket/react";
 import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
-import { PerspectiveCamera } from "@react-three/drei";
+import { cubeShipPart } from "./rocketParts/CubeShipPart";
+import { PerspectiveCamera, Stars} from "@react-three/drei";
 import Planet from "./planet/Planet";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
-import { Group, Object3D, Quaternion, Vector3 } from "three";
+import { Group, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { updatePlayer } from "@/game/planet";
 import { pressStart2P } from "@/app/fonts";
 
@@ -82,6 +83,7 @@ export function Game({ gameID }: { gameID: string }) {
 function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   const vector = new Vector3(0, 0, 0);
 
+  //UP
   if (
     pressedKeys.has("w") ||
     pressedKeys.has("W") ||
@@ -89,6 +91,8 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   ) {
     vector.z -= 1;
   }
+
+  //LEFT
   if (
     pressedKeys.has("a") ||
     pressedKeys.has("A") ||
@@ -96,6 +100,8 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   ) {
     vector.x -= 1;
   }
+
+  //DOWN
   if (
     pressedKeys.has("s") ||
     pressedKeys.has("S") ||
@@ -103,12 +109,22 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   ) {
     vector.z += 1;
   }
+
+  //RIGHT
   if (
     pressedKeys.has("d") ||
     pressedKeys.has("D") ||
     pressedKeys.has("ArrowRight")
   ) {
     vector.x += 1;
+  }
+
+  //PUNCH
+  if (
+    pressedKeys.has("e") ||
+    pressedKeys.has("E")
+  ) {
+
   }
 
   return vector;
@@ -118,6 +134,7 @@ const PLANET_RADIUS = 50;
 
 function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
   const playerRef = React.useRef<Group | null>(null);
+
 
   useEffect(() => {
     if (!playerRef.current) return;
@@ -164,8 +181,9 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
         decay={0}
         intensity={Math.PI}
       />
+      <Stars radius={40} depth={30} count={2500} factor={4} saturation={1} fade speed={0.5} />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Planet radius={PLANET_RADIUS} position={[0, 0, 0]} />
+      <Planet radius={PLANET_RADIUS} position={[0, 0, 0]}/>
       <Player ref={playerRef} direction={inputDirection.toArray()} />
       {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>

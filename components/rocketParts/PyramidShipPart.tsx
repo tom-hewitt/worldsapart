@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { Group} from "three";
 
-export const pyramidShipPart = forwardRef<Group | null > (function Player(props, ref) {
+export const pyramidShipPart = forwardRef<Group | null > (function pyramidShipPart(props, ref) {
   return (
     <group ref={ref}>
       <mesh>
