@@ -1,86 +1,22 @@
-nameStart Bi
-nameStart Tor
-nameStart Teri
-nameStart Alim
-nameStart Cre
-nameStart Dri
-nameStart Epi
-nameStart Fra
-nameStart Gro
-nameStart Hima
-nameStart Jutu
-nameStart Kima
-nameStart Lu
-nameStart Mi
-nameStart No
-nameStart Noto
-nameStart Ori
-nameStart Pru
-nameStart Qu
-nameStart Ria
-nameStart Su
-nameStart Umako
-nameStart Vime
-nameStart Wito
-nameStart Xi
-nameStart Ya
-nameStart Zumo
-nameStart Api
-nameStart Bele
-nameStart Cepi
-nameStart Do
-nameStart Ea
-nameStart Fe
-nameStart Gato
-nameStart Holo
-nameStart Ipe
-nameStart Jo
-nameStart Kala
-nameStart Lara
-nameStart Meta
-nameStart Noxa
-nameStart Orra
-nameStart Pi
-nameStart Quima
-nameStart Ro
-nameStart Sele
-nameStart Ule
-nameStart Vi
-nameStart Waxa
-nameStart Xo
-nameStart Yora
-nameStart Zuli
+Biprim II
+Cepiqum
+Kimaam
+Noxavim XIV
+Grothor
+Himagig
+Suam V
+Yoralia
+Zumoqum
+Ulebas IX
+Terivim
+Jutuqum
+Pruam
+Fraquathor
+Quimaw
+Vileuth
+Umakolup
+Laraam VI
+Xoroi
+Roqum
+Requiem III
 
-nameEnd von
-nameEnd oll
-nameEnd tol
-nameEnd gon
-nameEnd prim
-nameEnd tes
-nameEnd lup
-nameEnd vim
-nameEnd qua
-nameEnd pip
-nameEnd am
-nameEnd lm
-nameEnd thor
-nameEnd gig
-nameEnd ve
-nameEnd qum
-nameEnd la
-nameEnd leuth
-nameEnd bas
-nameEnd ro
-nameEnd porr
-nameEnd lia
-nameEnd w
-nameEnd kra
-nameEnd cor
-nameEnd mmon
-
-nameNumber I
-nameNumber II
-nameNumber III
-nameNumber IV
-nameNumber V
-nameNumber VI
