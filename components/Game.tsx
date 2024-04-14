@@ -13,6 +13,7 @@ import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystic
 import { Group, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { updatePlayer } from "@/game/planet";
 import { pressStart2P } from "@/app/fonts";
+import { PLANET_RADIUS, PlayerData } from "@/party/planet";
 
 function usePressedKeys() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -59,12 +60,14 @@ export function Game({ gameID }: { gameID: string }) {
 }
 
 export function GamePlanet({ planetID }: { planetID: string }) {
+  const [players, setPlayers] = useState<{ [id: string]: PlayerData }>({});
+
   const planetSocket = usePartySocket({
     host: PARTYKIT_HOST,
     room: planetID,
     party: "planet",
     onMessage(event) {
-      console.log("Received message", event);
+      setPlayers(JSON.parse(event.data));
     },
   });
 
@@ -82,12 +85,12 @@ export function GamePlanet({ planetID }: { planetID: string }) {
     planetSocket.send(
       JSON.stringify({ inputDirection: inputDirection.toArray() })
     );
-  });
+  }, [inputDirection]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas>
-        <GameWorld inputDirection={inputDirection} />
+        <GameWorld players={players} localPlayerID={planetSocket.id} />
       </Canvas>
       <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
         <Joystick
@@ -157,45 +160,49 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   return vector;
 }
 
-const PLANET_RADIUS = 50;
+function GameWorld({
+  players,
+  localPlayerID,
+}: {
+  players: { [id: string]: PlayerData };
+  localPlayerID: string;
+}) {
+  // useEffect(() => {
+  //   if (!playerRef.current) return;
 
-function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
-  const playerRef = React.useRef<Group | null>(null);
+  //   playerRef.current.position.set(0, 20, 0);
 
-  useEffect(() => {
-    if (!playerRef.current) return;
+  //   playerRef.current.quaternion.set(0, 0, 0, 1);
+  // }, []);
 
-    playerRef.current.position.set(0, 20, 0);
+  // useFrame((_, delta) => {
+  //   if (!playerRef.current) return;
 
-    playerRef.current.quaternion.set(0, 0, 0, 1);
-  }, []);
+  //   const { position, quaternion } = updatePlayer(
+  //     {
+  //       position: playerRef.current.position.toArray() as [
+  //         number,
+  //         number,
+  //         number
+  //       ],
+  //       quaternion: playerRef.current.quaternion.toArray() as [
+  //         number,
+  //         number,
+  //         number,
+  //         number
+  //       ],
+  //     },
+  //     delta,
+  //     inputDirection.toArray() as [number, number, number],
+  //     PLANET_RADIUS
+  //   );
 
-  useFrame((_, delta) => {
-    if (!playerRef.current) return;
+  //   playerRef.current.position.set(...position);
 
-    const { position, quaternion } = updatePlayer(
-      {
-        position: playerRef.current.position.toArray() as [
-          number,
-          number,
-          number
-        ],
-        quaternion: playerRef.current.quaternion.toArray() as [
-          number,
-          number,
-          number,
-          number
-        ],
-      },
-      delta,
-      inputDirection,
-      PLANET_RADIUS
-    );
+  //   playerRef.current.quaternion.set(...quaternion);
+  // });
 
-    playerRef.current.position.set(...position);
-
-    playerRef.current.quaternion.set(...quaternion);
-  });
+  console.log(players);
 
   return (
     <>
@@ -218,8 +225,21 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={PLANET_RADIUS} position={[0, 0, 0]} />
-      <Player ref={playerRef} direction={inputDirection.toArray()} />
-      {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
+      {Object.entries(players).map(([id, player]) => (
+        <Player
+          key={id}
+          position={player.position}
+          quaternion={player.quaternion}
+          direction={player.inputDirection}
+          isLocalPlayer={id === localPlayerID}
+        />
+      ))}
+
+      <PerspectiveCamera
+        position={[0, 0, 150]}
+        // makeDefault={!players[localPlayerID]}
+        makeDefault
+      />
     </>
   );
 }

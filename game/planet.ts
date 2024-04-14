@@ -9,7 +9,7 @@ export function updatePlayer(
     quaternion: [number, number, number, number];
   },
   delta: number,
-  inputDirection: Vector3,
+  inputDirection: [number, number, number],
   planetRadius: number
 ): {
   position: [number, number, number];
@@ -30,8 +30,7 @@ export function updatePlayer(
 
   const positionVector = new Vector3(...current.position);
 
-  const movementVector = inputDirection
-    .clone()
+  const movementVector = new Vector3(...inputDirection)
     .applyQuaternion(new Quaternion().fromArray(current.quaternion))
     .multiplyScalar(MOVEMENT_SPEED * delta);
 

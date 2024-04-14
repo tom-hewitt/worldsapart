@@ -5,20 +5,30 @@ import { Astronaut } from "./Astronaut";
 
 export const Player = forwardRef<
   Group | null,
-  { direction: [number, number, number] }
->(function Player({ direction }, ref) {
+  {
+    direction: [number, number, number];
+    position: [number, number, number];
+    quaternion: [number, number, number, number];
+    isLocalPlayer?: boolean;
+  }
+>(function Player(
+  { direction, position, quaternion, isLocalPlayer = false },
+  ref
+) {
   return (
-    <group ref={ref}>
-      <Astronaut direction={direction} />
+    <group ref={ref} position={position} quaternion={quaternion}>
+      {/* <Astronaut direction={direction} /> */}
 
-      {/* <arrowHelper
+      <arrowHelper
         args={[new Vector3(0, 1, 0), new Vector3(0, 0, 0), 5, 0xff0000, 3, 3]}
-      /> */}
-      <PerspectiveCamera
-        position={[0, 8, 20]}
-        rotation={[-0.3, 0, 0]}
-        makeDefault={true}
       />
+      {/* {isLocalPlayer ? (
+        <PerspectiveCamera
+          position={[0, 8, 20]}
+          rotation={[-0.3, 0, 0]}
+          makeDefault={true}
+        />
+      ) : null} */}
     </group>
   );
 });
