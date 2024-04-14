@@ -3,31 +3,32 @@ import { json } from "node:stream/consumers";
 
 const randomId = () => Math.random().toString(36).substring(2, 10);
 
-export default class GameServer implements Party.Server {
-  options: Party.ServerOptions = {
-    hibernate: true,
-  };
+const NUM_PLAYERS = 1; //DEBUG
+//const NUM_PLAYERS = 4;
 
-  private connections: Array<Party.Connection> = [];
-  private activePlanetIDs: Array<String> = [];
+export default class GameServer implements Party.Server {
+    options: Party.ServerOptions = {
+        hibernate: true,
+    };
   constructor(readonly room: Party.Room) {}
 
-  async onRequest(request: Party.Request) {
-    if (request.method === "POST" && request.body) {
-      const data = (await request.json()) as { type: string };
-      if (
-        data.type === "ALIVE-QUERY" &&
-        (this.connections.length > 0 || this.activePlanetIDs.length > 0)
-      ) {
-        return new Response("OK", { status: 200 });
-      } else {
-        return new Response("NOT ALIVE", { status: 400 });
-      }
-    }
-    return new Response("NOT FOUND", { status: 404 });
-  }
+    async onRequest(request: Party.Request) {
+        if (request.method === "POST" && request.body) {
+            const data = await request.json() as { type: string };
+            const connections = Array.from(this.room.getConnections());
+            const activePlanetIDs : string[] = await this.room.storage.get("activePlanetIDs") ?? [];
+            if (data.type === "ALIVE-QUERY" && ((connections.length > 0) || (activePlanetIDs.length > 0))) {
+                return new Response("OK", {status: 200});
+            } else {
+                return new Response("NOT ALIVE", {status: 400});
+            }
+        }
+        return new Response("NOT FOUND", {status: 404});
 
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    }
+
+
+  async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     // A websocket just connected!
     console.log(
       `Connected To Game:
@@ -36,33 +37,36 @@ export default class GameServer implements Party.Server {
   url: ${new URL(ctx.request.url).pathname}`
     );
 
-    // Add connection to list
-    this.connections.push(conn);
+      let activePlanetIDs : string[] = await this.room.storage.get("activePlanetIDs") ?? [];
+      let waitingIDs : string[] = await this.room.storage.get("waitingIDs") ?? [];
+      const connections = Array.from(this.room.getConnections());
+
+        // Add to waiting list
+        waitingIDs.push(conn.id);
 
     // Send number of waiting connections
-    for (let i = 0; i < this.connections.length; i++) {
-      const data = JSON.stringify({
-        type: "WAIT",
-        data: 4 - this.connections.length,
-      });
-      this.connections[i].send(data);
-    }
-
-    // Check how many waiting
-    if (this.connections.length >= 0) {
-      // Create a new planet
-      const planetID = randomId();
-      this.activePlanetIDs.push(planetID);
-
-      // Send the planet id to the first 4 connections
-      for (let i = 0; i < 4; i++) {
-        const data = JSON.stringify({ type: "CONN", data: planetID });
-        this.connections[i].send(data);
+      const data = JSON.stringify({type:"WAIT", data: 4 - waitingIDs.length});
+      for (const id of waitingIDs) {
+          this.room.getConnection(id)!.send(data);
       }
 
-      // Remove the first 4 connections
-      this.connections = this.connections.slice(4);
+    // Check how many waiting
+    if (waitingIDs.length >= NUM_PLAYERS) {
+        // Create a new planet
+        const planetID = randomId();
+        activePlanetIDs.push(planetID);
+        this.room.storage.put("activePlanetIDs", activePlanetIDs);
+
+        // Send the planet id to the first 4 connections
+        for (let i = 0; i < 4; i++) {
+            const data = JSON.stringify({type:"CONN", data: planetID});
+            this.room.getConnection(waitingIDs[i])!.send(data);
+        }
+
+        // Remove connections from waiting list
+        waitingIDs.splice(0, 4);
     }
+    this.room.storage.put("waitingIDs", waitingIDs);
   }
 
   onMessage(message: string, sender: Party.Connection) {
@@ -76,11 +80,21 @@ export default class GameServer implements Party.Server {
     );
   }
 
-  onClose(conn: Party.Connection) {
+  async onClose(conn: Party.Connection) {
+      let waitingIDs : string[] = await this.room.storage.get("waitingIDs") ?? [];
     // A websocket just disconnected!
     console.log(`Disconnected from Game: ${conn.id}`);
-    // Remove connection from list
-    this.connections = this.connections.filter((c) => c !== conn);
+
+      waitingIDs.splice(waitingIDs.indexOf(conn.id), 1);
+
+      // Send number of waiting connections
+      const data = JSON.stringify({type:"WAIT", data: 4 - waitingIDs.length});
+      for (const id of waitingIDs) {
+          this.room.getConnection(id)!.send(data);
+      }
+
+      this.room.storage.put("waitingIDs", waitingIDs);
+
   }
 }
 
