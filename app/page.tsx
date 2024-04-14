@@ -1,6 +1,8 @@
 import Link from "next/link";
 import {redirect} from "next/navigation";
 import {pressStart2P} from "./fonts";
+import {PARTYKIT_URL} from "@/app/env";
+import {InvalidGame} from "@/components/InvalidGame";
 
 export default function Home() {
     async function joinGame(formData: FormData) {
@@ -8,7 +10,27 @@ export default function Home() {
 
         const gameID = formData.get("gameId");
 
+        const res = await fetch(`${PARTYKIT_URL}/party/${gameID}`, {
+            method: "POST",
+            body: JSON.stringify({ type: "ALIVE-QUERY" }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (res.status !== 200) {
+            return redirect("/invalid");
+        }
+
         redirect(`${gameID}`);
+    }
+
+    async function createGame() {
+        "use server";
+
+        const randomId = () => Math.random().toString(36).substring(2, 10);
+
+        redirect(`${randomId()}`);
     }
 
     return (
@@ -27,13 +49,13 @@ export default function Home() {
                 </span></button>
             </form>
             <h5 className="py-5">OR</h5>
-            <Link href={`/new-game`}
+            <form action={createGame}
                   className="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-md font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
-                <span
+                <button type="submit"
                     className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
                 New Game
-                </span>
-            </Link>
+                </button>
+            </form>
         </div>
     );
 }

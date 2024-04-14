@@ -15,15 +15,13 @@ export default class GameServer implements Party.Server {
     async onRequest(request: Party.Request) {
         if (request.method === "POST" && request.body) {
             const data = await request.json() as {type: string};
-            console.log(data.type);
-            if (data.type === "ALIVE-QUERY" && (this.connections.length > 0) || (this.activePlanetIDs.length > 0)) {
+            if (data.type === "ALIVE-QUERY" && ((this.connections.length > 0) || (this.activePlanetIDs.length > 0))) {
                 return new Response("OK", {status: 200});
             } else {
                 return new Response("NOT ALIVE", {status: 400});
             }
         }
         return new Response("NOT FOUND", {status: 404});
-
 
     }
 
