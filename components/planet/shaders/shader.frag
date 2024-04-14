@@ -1,25 +1,40 @@
 varying vec2 vUv;
 
+uniform vec3 colorA;
+uniform vec3 colorB;
+uniform vec3 colorC;
+uniform vec3 colorD;
+uniform int shaderType;
+
 void main() {
-    vec3 colorA = vec3(0.87, 0.25, 0.25); // Red
-    vec3 colorB = vec3(0.31, 0.6, 0.94);  // Blue
-    vec3 colorC = vec3(0.85, 0.46, 0.22); // Orange
-    vec3 colorD = vec3(0.88, 0.49, 0.8);  // Yellow
+    if(shaderType == 0) {
+        float numBands = 20.0;
+        float bandWidth = 1.0 / numBands;
 
-    // Calculate the distance from the center of the screen
-    vec2 center = vec2(0.5, 0.5);
-    float distance = distance(vUv, center);
+        float bandIndex = floor(vUv.y * numBands);
 
-    // Map the distance to a range between 0 and 1
-    float gradientFactorAB = smoothstep(0.0, 0.4, distance); // Red to Blue
-    float gradientFactorCD = smoothstep(0.4, 0.8, distance); // Orange to Yellow
+        float band = smoothstep(bandIndex * bandWidth, (bandIndex + 1.0) * bandWidth, vUv.y);
+        float nextBand = smoothstep((bandIndex + 1.0) * bandWidth, (bandIndex + 2.0) * bandWidth, vUv.y);
 
-    // Mix the colors based on the gradient factors
-    vec3 colorAB = mix(colorA, colorB, gradientFactorAB);
-    vec3 colorCD = mix(colorC, colorD, gradientFactorCD);
-    
-    // Blend the two gradient colors together
-    vec3 finalColor = mix(colorAB, colorCD, gradientFactorCD);
+        vec3 colorAB = mix(colorA, colorB, band);
+        vec3 colorBC = mix(colorB, colorC, band);
+        vec3 colorCD = mix(colorC, colorD, band);
+        vec3 finalColor = mix(colorCD, colorD, nextBand);
+        gl_FragColor = vec4(finalColor, 1.0);
 
-    gl_FragColor = vec4(finalColor, 1.0);
+    } else {
+        float bandWidth = 0.25;
+        float band1 = smoothstep(0.0, bandWidth, vUv.y);
+        float band2 = smoothstep(bandWidth, 2.0 * bandWidth, vUv.y);
+        float band3 = smoothstep(2.0 * bandWidth, 3.0 * bandWidth, vUv.y);
+        float band4 = smoothstep(3.0 * bandWidth, 1.0, vUv.y);
+
+// Adjust the interpolation ranges to ensure all colors are visible
+        vec3 colorAB = mix(colorA, colorB, band1);
+        vec3 colorBC = mix(colorB, colorC, band2 - band1);
+        vec3 colorCD = mix(colorC, colorD, band3 - band2);
+        vec3 finalColor = mix(colorD, colorC, band4 - band3);
+
+        gl_FragColor = vec4(finalColor, 1.0);
+    }     
 }
