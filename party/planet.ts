@@ -1,10 +1,16 @@
 import type * as Party from "partykit/server";
 
-export default class Server implements Party.Server {
+type Player = {
+  id: string;
+  inputDirection: [number, number, number];
+};
+
+export default class PlanetServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
 
+  players: { [id: string]: Player } = {};
+
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    // A websocket just connected!
     console.log(
       `Connected To Planet:
   id: ${conn.id}
@@ -14,18 +20,26 @@ export default class Server implements Party.Server {
 
     // let's send a message to the connection
     conn.send("hello from server");
+
+    this.players[conn.id] = {
+      id: conn.id,
+      inputDirection: [0, 0, 0],
+    };
   }
 
   onMessage(message: string, sender: Party.Connection) {
-    // let's log the message
     console.log(`connection ${sender.id} sent message: ${message}`);
-    // as well as broadcast it to all the other connections in the room...
-    this.room.broadcast(
-      `${sender.id}: ${message}`,
-      // ...except for the connection it came from
-      [sender.id]
-    );
+
+    const messageJSON = JSON.parse(message);
+
+    if (messageJSON.inputDirection) {
+      const player = this.players[sender.id];
+
+      player!.inputDirection = messageJSON.inputDirection;
+
+      console.log(player);
+    }
   }
 }
 
-Server satisfies Party.Worker;
+PlanetServer satisfies Party.Worker;

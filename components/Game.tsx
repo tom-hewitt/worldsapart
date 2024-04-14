@@ -1,12 +1,12 @@
 "use client";
 
-import React, { Ref, useEffect, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import React, { useEffect, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { usePartySocket } from "partysocket/react";
 import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
 import { cubeShipPart } from "./rocketParts/CubeShipPart";
-import { PerspectiveCamera, Stars} from "@react-three/drei";
+import { PerspectiveCamera, Stars } from "@react-three/drei";
 import Planet from "./planet/Planet";
 import { Joystick } from "react-joystick-component";
 import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
@@ -43,6 +43,23 @@ function usePressedKeys() {
 }
 
 export function Game({ gameID }: { gameID: string }) {
+  const gameSocket = usePartySocket({
+    host: PARTYKIT_HOST,
+    room: gameID,
+    onMessage(event) {
+      console.log("Received message", event);
+    },
+  });
+
+  const planetSocket = usePartySocket({
+    host: PARTYKIT_HOST,
+    room: "planet-test",
+    party: "planet",
+    onMessage(event) {
+      console.log("Received message", event);
+    },
+  });
+
   const [joystickDirection, setJoystickDirection] = useState<Vector3>(
     new Vector3(0, 0, 0)
   );
@@ -52,6 +69,12 @@ export function Game({ gameID }: { gameID: string }) {
   const inputDirection = pressedKeys.size
     ? pressedKeysToVector(pressedKeys)
     : joystickDirection;
+
+  useEffect(() => {
+    planetSocket.send(
+      JSON.stringify({ inputDirection: inputDirection.toArray() })
+    );
+  });
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -83,7 +106,7 @@ export function Game({ gameID }: { gameID: string }) {
 function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
   const vector = new Vector3(0, 0, 0);
 
-  //UP
+  // UP
   if (
     pressedKeys.has("w") ||
     pressedKeys.has("W") ||
@@ -92,7 +115,7 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
     vector.z -= 1;
   }
 
-  //LEFT
+  // LEFT
   if (
     pressedKeys.has("a") ||
     pressedKeys.has("A") ||
@@ -101,7 +124,7 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
     vector.x -= 1;
   }
 
-  //DOWN
+  // DOWN
   if (
     pressedKeys.has("s") ||
     pressedKeys.has("S") ||
@@ -110,7 +133,7 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
     vector.z += 1;
   }
 
-  //RIGHT
+  // RIGHT
   if (
     pressedKeys.has("d") ||
     pressedKeys.has("D") ||
@@ -119,12 +142,8 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
     vector.x += 1;
   }
 
-  //PUNCH
-  if (
-    pressedKeys.has("e") ||
-    pressedKeys.has("E")
-  ) {
-
+  // PUNCH
+  if (pressedKeys.has("e") || pressedKeys.has("E")) {
   }
 
   return vector;
@@ -134,7 +153,6 @@ const PLANET_RADIUS = 50;
 
 function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
   const playerRef = React.useRef<Group | null>(null);
-
 
   useEffect(() => {
     if (!playerRef.current) return;
@@ -181,9 +199,17 @@ function GameWorld({ inputDirection }: { inputDirection: Vector3 }) {
         decay={0}
         intensity={Math.PI}
       />
-      <Stars radius={40} depth={30} count={2500} factor={4} saturation={1} fade speed={0.5} />
+      <Stars
+        radius={40}
+        depth={30}
+        count={2500}
+        factor={4}
+        saturation={1}
+        fade
+        speed={0.5}
+      />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Planet radius={PLANET_RADIUS} position={[0, 0, 0]}/>
+      <Planet radius={PLANET_RADIUS} position={[0, 0, 0]} />
       <Player ref={playerRef} direction={inputDirection.toArray()} />
       {/* <PerspectiveCamera position={[0, 0, 60]} makeDefault /> */}
     </>
