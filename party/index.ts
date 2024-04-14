@@ -15,7 +15,7 @@ export default class GameServer implements Party.Server {
     );
 
     // send the planet id
-    conn.send(randomId());
+    conn.send("same-planet");
   }
 
   onMessage(message: string, sender: Party.Connection) {
