@@ -14,24 +14,20 @@ export default async function Dashboard({
 
   let gameData;
 
-  const fetchGameData = async () => {
-    const res = await fetch(`${PARTYKIT_URL}/party/${gameID}`, {
-      method: "POST",
-      body: JSON.stringify({ type: "STATS-QUERY" }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  const res = await fetch(`${PARTYKIT_URL}/party/${gameID}`, {
+    method: "POST",
+    body: JSON.stringify({ type: "STATS-QUERY" }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (res.status !== 200) {
-      redirect("/invalid");
-      return;
-    }
+  if (res.status !== 200) {
+    redirect("/invalid");
+    return;
+  }
 
-    gameData = await res.json();
-  };
-
-  await fetchGameData();
+  gameData = await res.json();
 
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen w-screen">
@@ -42,7 +38,7 @@ export default async function Dashboard({
         {Object.entries(gameData).map(([key, value]) => (
           <div key={key} className="p-4 border rounded shadow-lg">
             <h2 className="font-bold">{key}</h2>
-            <p>{value.toString()}</p>
+            <p>{(value as any).toString()}</p>
           </div>
         ))}
       </div>
