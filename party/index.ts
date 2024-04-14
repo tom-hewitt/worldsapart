@@ -16,6 +16,7 @@ export default class GameServer implements Party.Server {
     if (request.method === "POST" && request.body) {
       const data = (await request.json()) as { type: string };
       const connections = Array.from(this.room.getConnections());
+      console.log("Connections: ", connections.length);
       const activePlanetIDs: string[] =
         (await this.room.storage.get("activePlanetIDs")) ?? [];
       if (
@@ -23,6 +24,12 @@ export default class GameServer implements Party.Server {
         (connections.length > 0 || activePlanetIDs.length > 0)
       ) {
         return new Response("OK", { status: 200 });
+      } else if (data.type === "STATS-QUERY") {
+        let json_data = JSON.stringify({
+          num_planets: activePlanetIDs.length,
+          num_players: connections.length,
+        });
+        return new Response(json_data, { status: 200 });
       } else {
         return new Response("NOT ALIVE", { status: 400 });
       }
@@ -36,7 +43,7 @@ export default class GameServer implements Party.Server {
       `Connected To Game:
   id: ${conn.id}
   game: ${this.room.id}
-  url: ${new URL(ctx.request.url).pathname}`
+  url: ${new URL(ctx.request.url).pathname}`,
     );
 
     let activePlanetIDs: string[] =
@@ -49,7 +56,10 @@ export default class GameServer implements Party.Server {
     waitingIDs.push(conn.id);
 
     // Send number of waiting connections
-    const data = JSON.stringify({ type: "WAIT", data: NUM_PLAYERS - waitingIDs.length });
+    const data = JSON.stringify({
+      type: "WAIT",
+      data: NUM_PLAYERS - waitingIDs.length,
+    });
     for (const id of waitingIDs) {
       this.room.getConnection(id)?.send(data);
     }
@@ -80,7 +90,7 @@ export default class GameServer implements Party.Server {
     this.room.broadcast(
       `${sender.id}: ${message}`,
       // ...except for the connection it came from
-      [sender.id]
+      [sender.id],
     );
   }
 
@@ -90,12 +100,15 @@ export default class GameServer implements Party.Server {
     // A websocket just disconnected!
     console.log(`Disconnected from Game: ${conn.id}`);
 
-        if (waitingIDs.indexOf(conn.id) >= 0) {
-            waitingIDs.splice(waitingIDs.indexOf(conn.id), 1);
-        }
+    if (waitingIDs.indexOf(conn.id) >= 0) {
+      waitingIDs.splice(waitingIDs.indexOf(conn.id), 1);
+    }
 
     // Send number of waiting connections
-    const data = JSON.stringify({ type: "WAIT", data: NUM_PLAYERS - waitingIDs.length });
+    const data = JSON.stringify({
+      type: "WAIT",
+      data: NUM_PLAYERS - waitingIDs.length,
+    });
     for (const id of waitingIDs) {
       this.room.getConnection(id)?.send(data);
     }

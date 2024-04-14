@@ -58,7 +58,7 @@ export default class PlanetServer implements Party.Server {
         name: ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)],
         ...randomPlanetSurfacePlacement(),
       },
-    ])
+    ]),
   );
 
   updateInterval: NodeJS.Timeout | null = null;
@@ -68,7 +68,7 @@ export default class PlanetServer implements Party.Server {
       `Connected To Planet:
   id: ${conn.id}
   planet: ${this.room.id}
-  url: ${new URL(ctx.request.url).pathname}`
+  url: ${new URL(ctx.request.url).pathname}`,
     );
 
     this.players[conn.id] = {
@@ -118,7 +118,7 @@ export default class PlanetServer implements Party.Server {
         player,
         TIME_STEP / 1000,
         player.inputDirection,
-        PLANET_RADIUS
+        PLANET_RADIUS,
       );
 
       player.position = position;
@@ -129,7 +129,7 @@ export default class PlanetServer implements Party.Server {
           Math.hypot(
             item.position[0] - player.position[0],
             item.position[1] - player.position[1],
-            item.position[2] - player.position[2]
+            item.position[2] - player.position[2],
           ) < 2
         ) {
           player.inventory.push(id);
@@ -139,7 +139,7 @@ export default class PlanetServer implements Party.Server {
     }
 
     this.room.broadcast(
-      JSON.stringify({ players: this.players, items: this.items })
+      JSON.stringify({ players: this.players, items: this.items }),
     );
   }
 }
