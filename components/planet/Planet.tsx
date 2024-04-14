@@ -74,10 +74,6 @@ function Planet({
 
   const randomColors = generateContrastColors(color);
 
-  console.log(randomColors)
-  // const fragmentShader = `...`;
-  // const vertexShader = `...`;
-
   return (
     <mesh ref={meshRef} position={position} rotation={rotation}>
       <sphereGeometry args={[radius, segments, segments]} />
