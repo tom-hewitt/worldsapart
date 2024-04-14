@@ -90,7 +90,9 @@ export default class GameServer implements Party.Server {
     // A websocket just disconnected!
     console.log(`Disconnected from Game: ${conn.id}`);
 
-    waitingIDs.splice(waitingIDs.indexOf(conn.id), 1);
+        if (waitingIDs.indexOf(conn.id) >= 0) {
+            waitingIDs.splice(waitingIDs.indexOf(conn.id), 1);
+        }
 
     // Send number of waiting connections
     const data = JSON.stringify({ type: "WAIT", data: 4 - waitingIDs.length });
