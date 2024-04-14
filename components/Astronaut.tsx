@@ -7,6 +7,8 @@ import * as THREE from "three";
 import React, { useMemo, useRef, useState } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { GLTF } from "three-stdlib";
+import { SkeletonUtils } from "three/examples/jsm/Addons.js";
+import { useGraph } from "@react-three/fiber";
 
 type GLTFResult = GLTF & {
   nodes: {
@@ -45,9 +47,9 @@ export function Astronaut({
   ...props
 }: JSX.IntrinsicElements["group"] & { direction?: [number, number, number] }) {
   const group = useRef<THREE.Group | null>(null);
-  const { nodes, materials, animations } = useGLTF(
-    "models/astronaut.glb"
-  ) as GLTFResult;
+  const { animations, scene } = useGLTF("models/astronaut.glb") as GLTFResult;
+  const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
+  const { nodes } = useGraph(clone) as GLTFResult;
   const { actions } = useAnimations(animations, group);
 
   const action = useMemo(() => {

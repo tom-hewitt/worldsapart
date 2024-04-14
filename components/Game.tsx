@@ -237,8 +237,7 @@ function GameWorld({
 
       <PerspectiveCamera
         position={[0, 0, 150]}
-        // makeDefault={!players[localPlayerID]}
-        makeDefault
+        makeDefault={!players[localPlayerID]}
       />
     </>
   );

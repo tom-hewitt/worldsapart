@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from "@react-three/drei";
 import { forwardRef } from "react";
-import { Group, Vector3 } from "three";
+import { Group } from "three";
 import { Astronaut } from "./Astronaut";
 
 export const Player = forwardRef<
@@ -17,18 +17,18 @@ export const Player = forwardRef<
 ) {
   return (
     <group ref={ref} position={position} quaternion={quaternion}>
-      {/* <Astronaut direction={direction} /> */}
+      <Astronaut direction={direction} />
 
-      <arrowHelper
+      {/* <arrowHelper
         args={[new Vector3(0, 1, 0), new Vector3(0, 0, 0), 5, 0xff0000, 3, 3]}
-      />
-      {/* {isLocalPlayer ? (
+      /> */}
+      {isLocalPlayer ? (
         <PerspectiveCamera
           position={[0, 8, 20]}
           rotation={[-0.3, 0, 0]}
           makeDefault={true}
         />
-      ) : null} */}
+      ) : null}
     </group>
   );
 });
