@@ -22,9 +22,9 @@ type GLTFResult = GLTF & {
     mixamorigHips: THREE.Bone;
   };
   materials: {
-    body: THREE.MeshStandardMaterial
-    visor: THREE.MeshStandardMaterial
-    Material: THREE.MeshStandardMaterial
+    body: THREE.MeshStandardMaterial;
+    visor: THREE.MeshStandardMaterial;
+    Material: THREE.MeshStandardMaterial;
   };
   animations: GLTFAction[];
 };
@@ -51,10 +51,14 @@ export function Astronaut({
   ...props
 }: JSX.IntrinsicElements["group"] & { direction?: [number, number, number] }) {
   const group = useRef<THREE.Group | null>(null);
-  const { animations,materials, scene } = useGLTF("models/astronaut2.glb") as GLTFResult;
+  const { animations, materials, scene } = useGLTF(
+    "models/astronaut2.glb"
+  ) as GLTFResult;
   const clone = useMemo(() => SkeletonUtils.clone(scene), [scene]);
   const { nodes } = useGraph(clone) as GLTFResult;
   const { actions } = useAnimations(animations, group);
+
+  materials.body.color = new THREE.Color(0xffffff);
 
   const action = useMemo(() => {
     const [x, y, z] = direction;
@@ -80,21 +84,54 @@ export function Astronaut({
     };
   }, [actions, action]);
 
-
-
   return (
     <group ref={group} {...props} dispose={null}>
       <group name="Scene">
         <group name="idle" rotation={[Math.PI / 2, 0, Math.PI]} scale={2}>
           <primitive object={nodes.mixamorigHips} />
-          
-          <skinnedMesh name="Cube" geometry={nodes.Cube.geometry} material={materials.body} skeleton={nodes.Cube.skeleton} />
-          <skinnedMesh name="Cube001" geometry={nodes.Cube001.geometry} material={materials.visor} skeleton={nodes.Cube001.skeleton} />
-          <skinnedMesh name="Cube002" geometry={nodes.Cube002.geometry} material={materials.body} skeleton={nodes.Cube002.skeleton} />
-          <skinnedMesh name="Cube003" geometry={nodes.Cube003.geometry} material={nodes.Cube003.material} skeleton={nodes.Cube003.skeleton} />
-          <skinnedMesh name="Cube004" geometry={nodes.Cube004.geometry} material={materials.body} skeleton={nodes.Cube004.skeleton} />
-          <skinnedMesh name="Cube005" geometry={nodes.Cube005.geometry} material={materials.Material} skeleton={nodes.Cube005.skeleton} />
-          <skinnedMesh name="Cylinder" geometry={nodes.Cylinder.geometry} material={nodes.Cylinder.material} skeleton={nodes.Cylinder.skeleton} />
+
+          <skinnedMesh
+            name="Cube"
+            geometry={nodes.Cube.geometry}
+            material={materials.body}
+            skeleton={nodes.Cube.skeleton}
+          />
+          <skinnedMesh
+            name="Cube001"
+            geometry={nodes.Cube001.geometry}
+            material={materials.visor}
+            skeleton={nodes.Cube001.skeleton}
+          />
+          <skinnedMesh
+            name="Cube002"
+            geometry={nodes.Cube002.geometry}
+            material={materials.body}
+            skeleton={nodes.Cube002.skeleton}
+          />
+          <skinnedMesh
+            name="Cube003"
+            geometry={nodes.Cube003.geometry}
+            material={nodes.Cube003.material}
+            skeleton={nodes.Cube003.skeleton}
+          />
+          <skinnedMesh
+            name="Cube004"
+            geometry={nodes.Cube004.geometry}
+            material={materials.body}
+            skeleton={nodes.Cube004.skeleton}
+          />
+          <skinnedMesh
+            name="Cube005"
+            geometry={nodes.Cube005.geometry}
+            material={materials.Material}
+            skeleton={nodes.Cube005.skeleton}
+          />
+          <skinnedMesh
+            name="Cylinder"
+            geometry={nodes.Cylinder.geometry}
+            material={nodes.Cylinder.material}
+            skeleton={nodes.Cylinder.skeleton}
+          />
           {/* <skinnedMesh
             name="Cube"
             geometry={nodes.Cube.geometry}
