@@ -85,8 +85,7 @@ export function GamePlanet({ planetID }: { planetID: string }) {
     },
   });
 
-  // optimistic updates
-  useFrame((_, delta) => {
+  const optimisticUpdate = (delta: number) => {
     const player = players[planetSocket.id];
 
     if (!player) return;
@@ -111,7 +110,7 @@ export function GamePlanet({ planetID }: { planetID: string }) {
         },
       });
     }
-  });
+  };
 
   const [joystickDirection, setJoystickDirection] = useState<Vector3>(
     new Vector3(0, 0, 0)
@@ -141,6 +140,7 @@ export function GamePlanet({ planetID }: { planetID: string }) {
           players={players}
           localPlayerID={planetSocket.id}
           items={items}
+          onFrame={optimisticUpdate}
         />
       </Canvas>
       <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
@@ -225,11 +225,18 @@ function GameWorld({
   players,
   localPlayerID,
   items,
+  onFrame,
 }: {
   players: { [id: string]: PlayerData };
   localPlayerID: string;
   items: { [id: string]: ItemData };
+  onFrame: (delta: number) => void;
 }) {
+  // optimistic updates
+  useFrame((_, delta) => {
+    onFrame(delta);
+  });
+
   return (
     <>
       <ambientLight intensity={Math.PI / 2} />
