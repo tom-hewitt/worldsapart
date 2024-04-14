@@ -49,9 +49,9 @@ export default class GameServer implements Party.Server {
     waitingIDs.push(conn.id);
 
     // Send number of waiting connections
-    const data = JSON.stringify({ type: "WAIT", data: 4 - waitingIDs.length });
+    const data = JSON.stringify({ type: "WAIT", data: NUM_PLAYERS - waitingIDs.length });
     for (const id of waitingIDs) {
-      this.room.getConnection(id)!.send(data);
+      this.room.getConnection(id)?.send(data);
     }
 
     // Check how many waiting
@@ -62,13 +62,13 @@ export default class GameServer implements Party.Server {
       this.room.storage.put("activePlanetIDs", activePlanetIDs);
 
       // Send the planet id to the first 4 connections
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < NUM_PLAYERS; i++) {
         const data = JSON.stringify({ type: "CONN", data: planetID });
-        this.room.getConnection(waitingIDs[i])!.send(data);
+        this.room.getConnection(waitingIDs[i])?.send(data);
       }
 
       // Remove connections from waiting list
-      waitingIDs.splice(0, 4);
+      waitingIDs.splice(0, NUM_PLAYERS);
     }
     this.room.storage.put("waitingIDs", waitingIDs);
   }
@@ -95,9 +95,9 @@ export default class GameServer implements Party.Server {
         }
 
     // Send number of waiting connections
-    const data = JSON.stringify({ type: "WAIT", data: 4 - waitingIDs.length });
+    const data = JSON.stringify({ type: "WAIT", data: NUM_PLAYERS - waitingIDs.length });
     for (const id of waitingIDs) {
-      this.room.getConnection(id)!.send(data);
+      this.room.getConnection(id)?.send(data);
     }
 
     this.room.storage.put("waitingIDs", waitingIDs);
