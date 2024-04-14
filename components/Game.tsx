@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { usePartySocket } from "partysocket/react";
 import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
@@ -14,6 +14,7 @@ import { WaitRoom } from "@/components/WaitRoom";
 import { ItemData, PLANET_RADIUS, PlayerData } from "@/party/planet";
 import { Item } from "./Item";
 import { Rocket } from "./Rocket";
+import { updatePlayer } from "@/game/planet";
 
 function usePressedKeys() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -82,6 +83,34 @@ export function GamePlanet({ planetID }: { planetID: string }) {
       setPlayers(players);
       setItems(items);
     },
+  });
+
+  // optimistic updates
+  useFrame((_, delta) => {
+    const player = players[planetSocket.id];
+
+    if (!player) return;
+
+    const { position, quaternion } = updatePlayer(
+      {
+        position: player.position,
+        quaternion: player.quaternion,
+      },
+      delta,
+      inputDirection.toArray() as [number, number, number],
+      PLANET_RADIUS
+    );
+
+    if (position !== player.position || quaternion !== player.quaternion) {
+      setPlayers({
+        ...players,
+        [planetSocket.id]: {
+          ...player,
+          position,
+          quaternion,
+        },
+      });
+    }
   });
 
   const [joystickDirection, setJoystickDirection] = useState<Vector3>(
@@ -201,41 +230,6 @@ function GameWorld({
   localPlayerID: string;
   items: { [id: string]: ItemData };
 }) {
-  // useEffect(() => {
-  //   if (!playerRef.current) return;
-
-  //   playerRef.current.position.set(0, 20, 0);
-
-  //   playerRef.current.quaternion.set(0, 0, 0, 1);
-  // }, []);
-
-  // useFrame((_, delta) => {
-  //   if (!playerRef.current) return;
-
-  //   const { position, quaternion } = updatePlayer(
-  //     {
-  //       position: playerRef.current.position.toArray() as [
-  //         number,
-  //         number,
-  //         number
-  //       ],
-  //       quaternion: playerRef.current.quaternion.toArray() as [
-  //         number,
-  //         number,
-  //         number,
-  //         number
-  //       ],
-  //     },
-  //     delta,
-  //     inputDirection.toArray() as [number, number, number],
-  //     PLANET_RADIUS
-  //   );
-
-  //   playerRef.current.position.set(...position);
-
-  //   playerRef.current.quaternion.set(...quaternion);
-  // });
-
   return (
     <>
       <ambientLight intensity={Math.PI / 2} />
