@@ -71,12 +71,12 @@ export function updatePlayer(
 
   const length = positionVector.length();
 
+  // apply gravity
   if (length > planetRadius) {
     positionVector.add(
       gravityDirection.clone().multiplyScalar(GRAVITY * delta)
     );
   }
-
   if (length < planetRadius) {
     positionVector.multiplyScalar(planetRadius / positionVector.length());
   }

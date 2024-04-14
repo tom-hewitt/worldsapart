@@ -1,8 +1,4 @@
-import {
-  planetSurfaceQuaternion,
-  updatePlayer,
-  randomPlanetSurfacePlacement,
-} from "@/game/planet";
+import { updatePlayer, randomPlanetSurfacePlacement } from "@/game/planet";
 import type * as Party from "partykit/server";
 
 export type PlayerData = {
@@ -14,7 +10,7 @@ export type PlayerData = {
 };
 
 export type ItemData = {
-  name: string;
+  name: "screwdriver" | "fuel";
   position: [number, number, number];
   quaternion: [number, number, number, number];
 };
@@ -22,6 +18,8 @@ export type ItemData = {
 const TIME_STEP = 1000 / 60;
 
 export const PLANET_RADIUS = 50;
+
+export const ITEM_TYPES = ["screwdriver", "fuel"] as const;
 
 export default class PlanetServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
@@ -31,7 +29,11 @@ export default class PlanetServer implements Party.Server {
   items: { [id: string]: ItemData } = Object.fromEntries(
     Array.from({ length: 50 }).map((_, i) => [
       i.toString(),
-      { name: "screwdriver", ...randomPlanetSurfacePlacement() },
+      {
+        // choose a random item
+        name: ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)],
+        ...randomPlanetSurfacePlacement(),
+      },
     ])
   );
 
@@ -48,8 +50,7 @@ export default class PlanetServer implements Party.Server {
     this.players[conn.id] = {
       id: conn.id,
       inputDirection: [0, 0, 0],
-      position: [0, 20, 0],
-      quaternion: [0, 0, 0, 1],
+      ...randomPlanetSurfacePlacement(),
       inventory: [],
     };
 
@@ -67,8 +68,6 @@ export default class PlanetServer implements Party.Server {
       const player = this.players[sender.id];
 
       player!.inputDirection = messageJSON.inputDirection;
-
-      console.log(player);
     }
   }
 

@@ -1,21 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { usePartySocket } from "partysocket/react";
 import { PARTYKIT_HOST } from "@/app/env";
 import { Player } from "./Player";
-import { cubeShipPart } from "./rocketParts/CubeShipPart";
 import { PerspectiveCamera, Stars } from "@react-three/drei";
 import Planet from "./planet/Planet";
 import { Joystick } from "react-joystick-component";
-import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
-import { Group, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from "three";
-import { updatePlayer } from "@/game/planet";
+import { Vector3 } from "three";
 import { pressStart2P } from "@/app/fonts";
 import { WaitRoom } from "@/components/WaitRoom";
 import { ItemData, PLANET_RADIUS, PlayerData } from "@/party/planet";
 import { Item } from "./Item";
+import { Rocket } from "./Rocket";
 
 function usePressedKeys() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -251,6 +249,13 @@ function GameWorld({
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
       <Planet radius={PLANET_RADIUS} position={[0, 0, 0]} />
+
+      <Rocket
+        position={[0, PLANET_RADIUS + 20, 0]}
+        rotation={[3.5, 0, 0]}
+        scale={5}
+      />
+
       {Object.entries(players).map(([id, player]) => (
         <Player
           key={id}
@@ -262,7 +267,12 @@ function GameWorld({
       ))}
 
       {Object.entries(items).map(([id, item]) => (
-        <Item key={id} position={item.position} quaternion={item.quaternion} />
+        <Item
+          key={id}
+          position={item.position}
+          quaternion={item.quaternion}
+          name={item.name}
+        />
       ))}
 
       <PerspectiveCamera
