@@ -100,6 +100,11 @@ export function GamePlanet({ planetID }: { planetID: string }) {
     );
   }, [inputDirection]);
 
+  const itemCounts = Object.values(items).reduce(
+    (counts, item) => ({ ...counts, [item.name]: counts[item.name] + 1 }),
+    { screwdriver: 0, fuel: 0 }
+  );
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas>
@@ -120,8 +125,15 @@ export function GamePlanet({ planetID }: { planetID: string }) {
           stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
         />
       </div>
-      <div className="absolute top-2 left-2">
+      <div className="flex flex-col absolute top-2 left-2 right-2">
         <span>PID: {planetID}</span>
+
+        {Object.entries(itemCounts).map(([name, count]) => (
+          <div className="flex flex-row gap-2">
+            <span>{count}x</span>
+            <span>{name}</span>
+          </div>
+        ))}
       </div>
       <div className="absolute text-center top-3 w-full">
         <h1
@@ -223,10 +235,6 @@ function GameWorld({
 
   //   playerRef.current.quaternion.set(...quaternion);
   // });
-
-  console.log(players);
-
-  console.log(items);
 
   return (
     <>
