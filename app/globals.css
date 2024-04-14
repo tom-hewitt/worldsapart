@@ -43,3 +43,10 @@ body {
     transform: scale(1.5);
   }
 }
+
+
+@media (max-width: 600px) {
+  .fix-ios {
+    bottom: 120px !important;
+  }
+}

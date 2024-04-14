@@ -143,7 +143,7 @@ export function GamePlanet({ planetID }: { planetID: string }) {
           onFrame={optimisticUpdate}
         />
       </Canvas>
-      <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
+      <div className="fix-ios" style={{ position: "absolute", bottom: "30px", right: "20px" }}>
         <Joystick
           size={100}
           sticky={false}
