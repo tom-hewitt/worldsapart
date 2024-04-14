@@ -1,9 +1,20 @@
-import { updatePlayer } from "@/game/planet";
+import {
+  planetSurfaceQuaternion,
+  updatePlayer,
+  randomPlanetSurfacePlacement,
+} from "@/game/planet";
 import type * as Party from "partykit/server";
 
 export type PlayerData = {
   id: string;
   inputDirection: [number, number, number];
+  position: [number, number, number];
+  quaternion: [number, number, number, number];
+  inventory: string[];
+};
+
+export type ItemData = {
+  name: string;
   position: [number, number, number];
   quaternion: [number, number, number, number];
 };
@@ -16,6 +27,13 @@ export default class PlanetServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
 
   players: { [id: string]: PlayerData } = {};
+
+  items: { [id: string]: ItemData } = Object.fromEntries(
+    Array.from({ length: 50 }).map((_, i) => [
+      i.toString(),
+      { name: "screwdriver", ...randomPlanetSurfacePlacement() },
+    ])
+  );
 
   updateInterval: NodeJS.Timeout | null = null;
 
@@ -32,6 +50,7 @@ export default class PlanetServer implements Party.Server {
       inputDirection: [0, 0, 0],
       position: [0, 20, 0],
       quaternion: [0, 0, 0, 1],
+      inventory: [],
     };
 
     if (Object.keys(this.players).length === 1) {
@@ -80,9 +99,24 @@ export default class PlanetServer implements Party.Server {
 
       player.position = position;
       player.quaternion = quaternion;
+
+      for (const [id, item] of Object.entries(this.items)) {
+        if (
+          Math.hypot(
+            item.position[0] - player.position[0],
+            item.position[1] - player.position[1],
+            item.position[2] - player.position[2]
+          ) < 2
+        ) {
+          player.inventory.push(id);
+          delete this.items[id];
+        }
+      }
     }
 
-    this.room.broadcast(JSON.stringify(this.players));
+    this.room.broadcast(
+      JSON.stringify({ players: this.players, items: this.items })
+    );
   }
 }
 

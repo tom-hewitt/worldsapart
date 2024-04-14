@@ -13,8 +13,9 @@ import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystic
 import { Group, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { updatePlayer } from "@/game/planet";
 import { pressStart2P } from "@/app/fonts";
-import {WaitRoom} from "@/components/WaitRoom";
-import { PLANET_RADIUS, PlayerData } from "@/party/planet";
+import { WaitRoom } from "@/components/WaitRoom";
+import { ItemData, PLANET_RADIUS, PlayerData } from "@/party/planet";
+import { Item } from "./Item";
 
 function usePressedKeys() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
@@ -72,13 +73,16 @@ export function Game({ gameID }: { gameID: string }) {
 
 export function GamePlanet({ planetID }: { planetID: string }) {
   const [players, setPlayers] = useState<{ [id: string]: PlayerData }>({});
+  const [items, setItems] = useState<{ [id: string]: ItemData }>({});
 
   const planetSocket = usePartySocket({
     host: PARTYKIT_HOST,
     room: planetID,
     party: "planet",
     onMessage(event) {
-      setPlayers(JSON.parse(event.data));
+      const { players, items } = JSON.parse(event.data);
+      setPlayers(players);
+      setItems(items);
     },
   });
 
@@ -99,37 +103,41 @@ export function GamePlanet({ planetID }: { planetID: string }) {
   }, [inputDirection]);
 
   return (
-      <div style={{position: "relative", width: "100%", height: "100%"}}>
-          <Canvas>
-              <GameWorld players={players} localPlayerID={planetSocket.id}/>
-          </Canvas>
-          <div style={{position: "absolute", bottom: "20px", right: "20px"}}>
-              <Joystick
-                  size={100}
-                  sticky={false}
-                  baseColor="white"
-                  stickColor="grey"
-                  start={() => setJoystickDirection(new Vector3(0, 0, 0))}
-                  move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
-                  stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
-              />
-          </div>
-          <div className="absolute top-2 left-2">
-              <span>PID: {planetID}</span>
-          </div>
-          <div className="absolute text-center top-3 w-full">
-              <h1
-                  className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}
-              >
-                  - Worlds Apart -
-              </h1>
-          </div>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <Canvas>
+        <GameWorld
+          players={players}
+          localPlayerID={planetSocket.id}
+          items={items}
+        />
+      </Canvas>
+      <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
+        <Joystick
+          size={100}
+          sticky={false}
+          baseColor="white"
+          stickColor="grey"
+          start={() => setJoystickDirection(new Vector3(0, 0, 0))}
+          move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
+          stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
+        />
       </div>
+      <div className="absolute top-2 left-2">
+        <span>PID: {planetID}</span>
+      </div>
+      <div className="absolute text-center top-3 w-full">
+        <h1
+          className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}
+        >
+          - Worlds Apart -
+        </h1>
+      </div>
+    </div>
   );
 }
 
 function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
-    const vector = new Vector3(0, 0, 0);
+  const vector = new Vector3(0, 0, 0);
 
   // UP
   if (
@@ -177,9 +185,11 @@ function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
 function GameWorld({
   players,
   localPlayerID,
+  items,
 }: {
   players: { [id: string]: PlayerData };
   localPlayerID: string;
+  items: { [id: string]: ItemData };
 }) {
   // useEffect(() => {
   //   if (!playerRef.current) return;
@@ -218,6 +228,8 @@ function GameWorld({
 
   console.log(players);
 
+  console.log(items);
+
   return (
     <>
       <ambientLight intensity={Math.PI / 2} />
@@ -247,6 +259,10 @@ function GameWorld({
           direction={player.inputDirection}
           isLocalPlayer={id === localPlayerID}
         />
+      ))}
+
+      {Object.entries(items).map(([id, item]) => (
+        <Item key={id} position={item.position} quaternion={item.quaternion} />
       ))}
 
       <PerspectiveCamera

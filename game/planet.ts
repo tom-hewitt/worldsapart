@@ -1,7 +1,40 @@
+import { PLANET_RADIUS } from "@/party/planet";
 import { Quaternion, Vector3 } from "three";
 
 const GRAVITY = -9.81;
 const MOVEMENT_SPEED = 10;
+
+export function randomPlanetSurfacePlacement(): {
+  position: [number, number, number];
+  quaternion: [number, number, number, number];
+} {
+  const direction = new Vector3().randomDirection();
+
+  const position = direction.multiplyScalar(PLANET_RADIUS).toArray() as [
+    number,
+    number,
+    number
+  ];
+
+  return {
+    position: position,
+    quaternion: planetSurfaceQuaternion(position),
+  };
+}
+
+export function planetSurfaceQuaternion(
+  position: [number, number, number],
+  quaternion: [number, number, number, number] = [0, 0, 0, 1]
+): [number, number, number, number] {
+  const gravityDirection = new Vector3(...position).normalize();
+
+  const bodyUp = new Vector3(0, 1, 0);
+
+  return new Quaternion()
+    .setFromUnitVectors(bodyUp, gravityDirection)
+    .multiply(new Quaternion(...quaternion))
+    .toArray() as [number, number, number, number];
+}
 
 export function updatePlayer(
   current: {
