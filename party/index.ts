@@ -1,6 +1,8 @@
 import type * as Party from "partykit/server";
 
-export default class Server implements Party.Server {
+const randomId = () => Math.random().toString(36).substring(2, 10);
+
+export default class GameServer implements Party.Server {
   constructor(readonly room: Party.Room) {}
 
   onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
@@ -12,8 +14,8 @@ export default class Server implements Party.Server {
   url: ${new URL(ctx.request.url).pathname}`
     );
 
-    // let's send a message to the connection
-    conn.send("hello from server");
+    // send the planet id
+    conn.send(randomId());
   }
 
   onMessage(message: string, sender: Party.Connection) {
@@ -28,4 +30,4 @@ export default class Server implements Party.Server {
   }
 }
 
-Server satisfies Party.Worker;
+GameServer satisfies Party.Worker;

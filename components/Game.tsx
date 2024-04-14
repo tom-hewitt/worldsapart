@@ -43,17 +43,25 @@ function usePressedKeys() {
 }
 
 export function Game({ gameID }: { gameID: string }) {
+  const [planetID, setPlanetID] = useState<string | null>(null);
+
   const gameSocket = usePartySocket({
     host: PARTYKIT_HOST,
     room: gameID,
     onMessage(event) {
-      console.log("Received message", event);
+      setPlanetID(event.data);
     },
   });
 
+  if (!planetID) return "Waiting";
+
+  if (planetID) return <GamePlanet planetID={planetID} />;
+}
+
+export function GamePlanet({ planetID }: { planetID: string }) {
   const planetSocket = usePartySocket({
     host: PARTYKIT_HOST,
-    room: "planet-test",
+    room: planetID,
     party: "planet",
     onMessage(event) {
       console.log("Received message", event);
