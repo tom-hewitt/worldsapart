@@ -13,6 +13,7 @@ import { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystic
 import { Group, MeshBasicMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { updatePlayer } from "@/game/planet";
 import { pressStart2P } from "@/app/fonts";
+import {WaitRoom} from "@/components/WaitRoom";
 import { PLANET_RADIUS, PlayerData } from "@/party/planet";
 
 function usePressedKeys() {
@@ -45,18 +46,28 @@ function usePressedKeys() {
 
 export function Game({ gameID }: { gameID: string }) {
   const [planetID, setPlanetID] = useState<string | null>(null);
+  const [waiting, setWaiting] = useState<number | null>(null);
 
   const gameSocket = usePartySocket({
     host: PARTYKIT_HOST,
     room: gameID,
     onMessage(event) {
-      setPlanetID(event.data);
+      const dataReceived = JSON.parse(event.data);
+      console.log("Received message", dataReceived);
+      if (dataReceived.type === "CONN") {
+        setPlanetID(dataReceived.data);
+      } else if (dataReceived.type === "WAIT") {
+        setWaiting(dataReceived.data);
+      }
     },
   });
 
-  if (!planetID) return "Waiting";
+  if (!planetID) {
+    return <WaitRoom waiting={waiting} gameID={gameID} />;
+  }
 
-  if (planetID) return <GamePlanet planetID={planetID} />;
+  // Render the game world if planetID is available
+  return <GamePlanet planetID={planetID} />;
 }
 
 export function GamePlanet({ planetID }: { planetID: string }) {
@@ -88,34 +99,37 @@ export function GamePlanet({ planetID }: { planetID: string }) {
   }, [inputDirection]);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <Canvas>
-        <GameWorld players={players} localPlayerID={planetSocket.id} />
-      </Canvas>
-      <div style={{ position: "absolute", bottom: "20px", right: "20px" }}>
-        <Joystick
-          size={100}
-          sticky={false}
-          baseColor="white"
-          stickColor="grey"
-          start={() => setJoystickDirection(new Vector3(0, 0, 0))}
-          move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
-          stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
-        />
+      <div style={{position: "relative", width: "100%", height: "100%"}}>
+          <Canvas>
+              <GameWorld players={players} localPlayerID={planetSocket.id}/>
+          </Canvas>
+          <div style={{position: "absolute", bottom: "20px", right: "20px"}}>
+              <Joystick
+                  size={100}
+                  sticky={false}
+                  baseColor="white"
+                  stickColor="grey"
+                  start={() => setJoystickDirection(new Vector3(0, 0, 0))}
+                  move={(e) => setJoystickDirection(new Vector3(e.x!, 0, -e.y!))}
+                  stop={() => setJoystickDirection(new Vector3(0, 0, 0))}
+              />
+          </div>
+          <div className="absolute top-2 left-2">
+              <span>PID: {planetID}</span>
+          </div>
+          <div className="absolute text-center top-3 w-full">
+              <h1
+                  className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}
+              >
+                  - Worlds Apart -
+              </h1>
+          </div>
       </div>
-      <div className="absolute text-center top-3 w-full">
-        <h1
-          className={`${pressStart2P.className} text-2xl text-black dark:text-white mb-20`}
-        >
-          - Worlds Apart -
-        </h1>
-      </div>
-    </div>
   );
 }
 
 function pressedKeysToVector(pressedKeys: Set<string>): Vector3 {
-  const vector = new Vector3(0, 0, 0);
+    const vector = new Vector3(0, 0, 0);
 
   // UP
   if (
