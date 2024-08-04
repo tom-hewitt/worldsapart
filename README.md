@@ -26,8 +26,6 @@ Worlds Apart offers players an immersive space adventure where they can join dyn
 
 ## License
 
-[MIT License]()
-
 ```
 MIT License
 
